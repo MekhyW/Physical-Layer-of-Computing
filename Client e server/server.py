@@ -32,7 +32,7 @@ def main():
         #Enviando dados para o client
         print("Iniciando transmissão de dados")
         
-        com1.sendData(np.asarray(txBuffer))
+        com1.sendData(np.asarray(int(txBuffer)))
             
         # Encerra comunicação
         print("-------------------------")
