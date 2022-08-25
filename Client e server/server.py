@@ -8,6 +8,13 @@ def main():
     try:
         com1 = enlace(serialName)
         com1.enable()
+
+        #Byte de sacrifício
+        print("Esperando 1 byte de sacrifício")
+        rxBuffer, nRx = com1.getData(1)
+        com1.rx.clearBuffer()
+        time.sleep(.1)
+
         print("Comunicação aberta com sucesso")
 
         print("Iniciando recepção de dados")

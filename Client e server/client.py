@@ -9,6 +9,12 @@ def main():
     try:
         com1 = enlace(serialName)
         com1.enable()
+
+        #Byte de sacrifício
+        time.sleep(.2)
+        com1.sendData(b'00')
+        time.sleep(1)
+
         print("Comunicação aberta com sucesso")
 
         print("Criando comandos...")
