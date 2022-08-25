@@ -8,7 +8,7 @@ def generateCommands(numberOfCommands, bytesize = 8):
     for value in range(numberOfCommands):
         command = commandList[value]
         while len(command) < bytesize:
-            command = "0" + command
+            command = "E" + command
         commandString += command
     commandBytes = commandString.encode()
     return commandBytes
