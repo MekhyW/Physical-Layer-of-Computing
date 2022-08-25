@@ -31,7 +31,7 @@ def main():
             time.sleep(1)
             timer += 1
             print(timer)
-            if timer >= 10:
+            if timer >= 5:
                 raise Exception("Timeout")
         rxBuffer, nRx = com1.getData(rxLen)
 
