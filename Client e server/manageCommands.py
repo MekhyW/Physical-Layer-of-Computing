@@ -1,7 +1,7 @@
 import random
 
 def generateCommands(numberOfCommands, bytesize = 8):
-    commands = ["00FF00FF", "00FFFF00", "FF", "00", "FF00", "00FF"]
+    commands = ["00FA0000", "0000FA00", "FA0000", "00FA00", "0000FA", "00FA", "FA00", "00", "FA"]
     commandList = random.choices(commands, k=numberOfCommands-len(commands)) + commands
     random.shuffle(commandList)
     commandString = ""
