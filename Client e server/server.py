@@ -1,7 +1,6 @@
 from enlace import *
 import time
 import numpy as np
-import manageCommands
 
 serialName = "COM6"
 
