@@ -13,7 +13,7 @@ def main():
         #Byte de sacrifício
         time.sleep(.2)
         com1.sendData(b'00')
-        time.sleep(1)
+        time.sleep(3)
 
         print("Comunicação aberta com sucesso")
 
