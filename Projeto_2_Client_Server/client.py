@@ -3,7 +3,7 @@ import time
 import numpy as np
 import manageCommands
 
-serialName = "COM6"
+serialName = "COM11"
 
 def main():
     try:
