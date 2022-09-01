@@ -1,10 +1,48 @@
+from operator import index
 from enlace import *
 import time
+import math
 import numpy as np
 import manageCommands
 
 serialName = "COM11"
 com1 = enlace(serialName)
+arquivo = None
+payload_size_limit = 114
+
+def start():
+    com1.enable()
+    time.sleep(.2)
+    com1.sendData(b'00')
+    time.sleep(1)
+    print("Bytes de sacrifício enviados")
+
+def loadFile():
+    global arquivo
+    filename = input("Digite o nome do arquivo a ser enviado: ")
+    try:
+        with open(filename, "rb") as file:
+            arquivo = file.read()
+            print("Arquivo carregado e lido")
+            file.close()
+    except FileNotFoundError:
+        print("Arquivo não encontrado")
+        quit()
+
+def buildPackages():
+    packages = []
+    for i in range(math.ceil(len(arquivo)/payload_size_limit)):
+        head = ''
+        payload = ''
+        eop = ''
+        for j in range(payload_size_limit):
+            try:
+                payload += str(arquivo[i*payload_size_limit+j])
+            except IndexError:
+                break
+    packages.append(bytes(head + payload + eop, "utf-8"))
+    return packages
+        
 
 def main():
     try:
@@ -12,25 +50,23 @@ def main():
 
         print("Iniciando transmissão de mensagem")
         
-        # Implementar envio da mensagem fragmentada aqui
-       
-        print("Aguardando retorno do servidor")
-        timer=0
-        print(timer)
-
-        rxLen = com1.rx.getBufferLen()
-        while not rxLen:
-            rxLen = com1.rx.getBufferLen()
-            time.sleep(1)
-            timer += 1
+        packages = buildPackages()
+        for package in packages:
+            com1.sendData(package)
+            print("Pacote: {}".format(index(package)))
+            timer=0
             print(timer)
-            if timer >= 5:
-                raise TimeoutError
-        rxBuffer, nRx = com1.getData(rxLen)
-
-        serverCommands = int.from_bytes(rxBuffer, "little")
-
-        # Implementar análise da resposta do servidor aqui
+            rxLen = com1.rx.getBufferLen()
+            while not rxLen:
+                rxLen = com1.rx.getBufferLen()
+                time.sleep(1)
+                timer += 1
+                print(timer)
+                if timer >= 5:
+                    raise TimeoutError
+            rxBuffer, nRx = com1.getData(rxLen)
+            serverCommands = int.from_bytes(rxBuffer, "little")
+            # Implementar análise da resposta do servidor aqui
 
         print("-------------------------")
         print("Comunicação encerrada")
@@ -42,7 +78,7 @@ def main():
             main()
         else:
             com1.disable()
-            exit()
+            quit()
 
     except Exception as erro:
         print("ops! :-\\")
@@ -52,9 +88,6 @@ def main():
 
 #so roda o main quando for executado do terminal ... se for chamado dentro de outro modulo nao roda
 if __name__ == "__main__":
-    com1.enable()
-    time.sleep(.2)
-    com1.sendData(b'00')
-    time.sleep(1)
-    print("Bytes de sacrifício enviados")
+    start()
+    loadFile()
     main()
