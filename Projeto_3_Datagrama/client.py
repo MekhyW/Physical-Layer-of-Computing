@@ -1,4 +1,4 @@
-from operator import index
+from datagrama import *
 from enlace import *
 import time
 import math
@@ -30,16 +30,19 @@ def loadFile():
 
 def buildPackages():
     packages = []
-    for i in range(math.ceil(len(arquivo)/payload_size_limit)):
-        head = ''
+    totalPayloads = math.ceil(len(arquivo)/payload_size_limit)
+    for i in range(totalPayloads):
+        head = Head('DD', '00', '00')
         payload = ''
-        eop = ''
         for j in range(payload_size_limit):
             try:
                 payload += str(arquivo[i*payload_size_limit+j])
             except IndexError:
                 break
-    packages.append(bytes(head + payload + eop, "utf-8"))
+        head.payloadData(totalPayloads, i, payload)
+        head.buildHead()
+        datagram = Datagrama(head, payload)
+        packages.append(bytes(datagram.head.finalString + datagram.payload + datagram.endOfPackage, "utf-8"))
     return packages
         
 
