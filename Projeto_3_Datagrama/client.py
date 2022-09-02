@@ -3,7 +3,6 @@ from enlace import *
 import time
 import math
 import numpy as np
-import manageCommands
 
 serialName = "COM11"
 com1 = enlace(serialName)
@@ -51,9 +50,9 @@ def main():
         print("Iniciando transmissão de mensagem")
         
         packages = buildPackages()
-        for package in packages:
-            com1.sendData(package)
-            print("Pacote: {}".format(index(package)))
+        for package_id in range(len(packages)):
+            com1.sendData(packages[package_id])
+            print("Pacote: {}".format(index(package_id)))
             timer=0
             print(timer)
             rxLen = com1.rx.getBufferLen()
