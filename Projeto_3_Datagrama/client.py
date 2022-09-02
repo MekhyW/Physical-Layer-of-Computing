@@ -29,7 +29,7 @@ def loadFile():
         quit()
 
 def handshake():
-    handshake_head = Head('HS', '00', '00')
+    handshake_head = Head('AA', 'CC', '55')
     handshake_head.buildHead()
     handshake = Datagrama(handshake_head, '')
     com1.sendData(bytes(handshake.head.finalString + handshake.endOfPackage, "utf-8"))
@@ -50,7 +50,7 @@ def buildPackages():
     packages = []
     totalPayloads = math.ceil(len(arquivo)/payload_size_limit)
     for i in range(totalPayloads):
-        head = Head('DD', '00', '00')
+        head = Head('DD', 'CC', '55')
         payload = ''
         for j in range(payload_size_limit):
             try:
@@ -72,11 +72,17 @@ def main():
         for package_id in range(len(packages)):
             com1.sendData(packages[package_id])
             print("Pacote: {}".format(package_id))
+            rxLen = 0
             while not rxLen:
                 rxLen = com1.rx.getBufferLen()
             rxBuffer, nRx = com1.getData(rxLen)
-            serverCommands = int.from_bytes(rxBuffer, "little")
-            # Implementar análise da resposta do servidor aqui
+            decoded = rxBuffer.decode()
+            if decoded.startswith('77'):
+                pass
+            elif decoded.startswith('99'):
+                package_id -= 1
+            else:
+                raise Exception("Erro: pacote recebido não é de confirmação")
         print("-------------------------")
         print("Comunicação encerrada")
         print("-------------------------")
