@@ -28,6 +28,24 @@ def loadFile():
         print("Arquivo não encontrado")
         quit()
 
+def handshake():
+    handshake_head = Head('HS', '00', '00')
+    handshake_head.buildHead()
+    handshake = Datagrama(handshake_head, '')
+    com1.sendData(bytes(handshake.head.finalString + handshake.endOfPackage, "utf-8"))
+    print('Handshake enviado, aguardando resposta do servidor...')
+    timer=0
+    print(timer)
+    rxLen = com1.rx.getBufferLen()
+    while not rxLen:
+        rxLen = com1.rx.getBufferLen()
+        time.sleep(1)
+        timer += 1
+        print(timer)
+        if timer >= 5:
+            raise TimeoutError
+
+
 def buildPackages():
     packages = []
     totalPayloads = math.ceil(len(arquivo)/payload_size_limit)
@@ -48,28 +66,17 @@ def buildPackages():
 
 def main():
     try:
-        # Implementar handshake aqui
-
+        handshake()
         print("Iniciando transmissão de mensagem")
-        
         packages = buildPackages()
         for package_id in range(len(packages)):
             com1.sendData(packages[package_id])
             print("Pacote: {}".format(package_id))
-            timer=0
-            print(timer)
-            rxLen = com1.rx.getBufferLen()
             while not rxLen:
                 rxLen = com1.rx.getBufferLen()
-                time.sleep(1)
-                timer += 1
-                print(timer)
-                if timer >= 5:
-                    raise TimeoutError
             rxBuffer, nRx = com1.getData(rxLen)
             serverCommands = int.from_bytes(rxBuffer, "little")
             # Implementar análise da resposta do servidor aqui
-
         print("-------------------------")
         print("Comunicação encerrada")
         print("-------------------------")
