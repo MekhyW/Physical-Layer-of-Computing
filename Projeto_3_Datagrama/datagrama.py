@@ -2,9 +2,9 @@ class Head:
     messageType: str    # 'DD' - dados, 'AA' - handshake, '77' - verification, '99' - resend
     senderId: str       # 'CC' - client, '55' - server
     receiverId: str     # 'CC' - client, '55' - server
-    totalPayloads: str = '0'
-    currentPayloadIndex: str = '0'
-    payloadSize: str = '0'
+    totalPayloads: str = '000000'
+    currentPayloadIndex: str = '000000'
+    payloadSize: str = '00'
     finalString = ''
 
     def __init__(self, messageType, senderId, receiverId):
