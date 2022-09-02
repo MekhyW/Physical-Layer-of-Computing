@@ -1,7 +1,7 @@
 class Head:
-    messageType: str
-    senderId: str
-    receiverId: str
+    messageType: str    # 'DD' - dados, 'AA' - handshake, '77' - verification, '99' - resend
+    senderId: str       # 'CC' - client, '55' - server
+    receiverId: str     # 'CC' - client, '55' - server
     totalPayloads: str = '0'
     currentPayloadIndex: str = '0'
     payloadSize: str = '0'
