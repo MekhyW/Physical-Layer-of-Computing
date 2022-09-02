@@ -19,6 +19,8 @@ def main():
 
         print("Comunicação aberta com sucesso")
 
+        #Implementar Handshake aqui
+
         print("Iniciando recepção de dados")
         rxLen = com1.rx.getBufferLen()
         while rxLen == 0:

@@ -1,2 +1,3 @@
-def stringToDatagram(datagram):
+def stringToDatagram(string):
+    
     pass
