@@ -52,7 +52,7 @@ def main():
         packages = buildPackages()
         for package_id in range(len(packages)):
             com1.sendData(packages[package_id])
-            print("Pacote: {}".format(index(package_id)))
+            print("Pacote: {}".format(package_id))
             timer=0
             print(timer)
             rxLen = com1.rx.getBufferLen()
