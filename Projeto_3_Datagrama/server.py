@@ -4,6 +4,8 @@ import numpy as np
 
 serialName = "COM7"
 
+previousPackageIndex = 0
+
 def main():
     try:
         com1 = enlace(serialName)
