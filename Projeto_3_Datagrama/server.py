@@ -95,7 +95,7 @@ def main():
         # Salvando arquivo
 
         print("Salvando arquivo")
-        with open("recebido.png", "wb") as arquivo:
+        with open("recebido.txt", "wb") as arquivo:
             arquivo.write(payload)
 
         # Encerra comunicação
