@@ -64,22 +64,26 @@ def main():
             datagram = stringToDatagram(decoded)
 
             if datagram.head.messageType == 'DD':
-                print(datagram.head.currentPayloadIndex)
-                print(type(datagram.head.currentPayloadIndex))
                 if int(datagram.head.currentPayloadIndex) == previousPackageIndex + 1:
                     print("Pacote recebido com sucesso")
                     payload += datagram.payload
-                    confirmation = Datagrama(Head('77', '55', 'CC'), '')
+                    confirmationHead = Head('77', '55', 'CC')
+                    confirmationHead.buildHead()
+                    confirmation = Datagrama(confirmationHead, '')
                     com1.sendData(bytes(confirmation.head.finalString + confirmation.endOfPackage, "utf-8"))
                     previousPackageIndex += 1
                 else:
                     print("Index do pacote errado, pedindo reenvio do pacote")
-                    confirmation = Datagrama(Head('99', '55', 'CC'), '')
+                    confirmationHead = Head('99', '55', 'CC')
+                    confirmationHead.buildHead()
+                    confirmation = Datagrama(confirmationHead, '')
                     com1.sendData(bytes(confirmation.head.finalString + confirmation.endOfPackage, "utf-8"))
                 
                 if datagram.head.currentPayloadIndex == datagram.head.totalPayloads:
                     print("Todos pacotes recebidos com sucesso")
-                    confirmation = Datagrama(Head('77', '55', 'CC'), '')
+                    confirmationHead = Head('77', '55', 'CC')
+                    confirmationHead.buildHead()
+                    confirmation = Datagrama(confirmationHead, '')
                     com1.sendData(bytes(confirmation.head.finalString + confirmation.endOfPackage, "utf-8"))
                     break
                 
