@@ -44,6 +44,7 @@ def handshake():
         print(timer)
         if timer >= 5:
             raise TimeoutError
+    com1.rx.clearBuffer()
 
 
 def buildPackages():
@@ -82,7 +83,9 @@ def main():
             elif decoded.startswith('99'):
                 package_id -= 1
             else:
+                print(decoded)
                 raise Exception("Erro: pacote recebido não é de confirmação")
+            com1.rx.clearBuffer()
         print("-------------------------")
         print("Comunicação encerrada")
         print("-------------------------")

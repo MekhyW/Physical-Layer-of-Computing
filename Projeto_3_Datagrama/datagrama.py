@@ -21,17 +21,11 @@ class Head:
             raise Exception("Error: Message type does not support non-0 payload")
 
     def buildHead(self):
-        if len(self.totalPayloads) == 1:
-            self.totalPayloads = '00' + self.totalPayloads
-        elif len(self.totalPayloads) == 2:
+        while len(self.totalPayloads) < 6:
             self.totalPayloads = '0' + self.totalPayloads
-        if len(self.currentPayloadIndex) == 1:
-            self.currentPayloadIndex = '00' + self.currentPayloadIndex
-        elif len(self.currentPayloadIndex) == 2:
+        while len(self.currentPayloadIndex) < 6:
             self.currentPayloadIndex = '0' + self.currentPayloadIndex
-        if len(self.payloadSize) == 1:
-            self.payloadSize = '00' + self.payloadSize
-        elif len(self.payloadSize) == 2:
+        while len(self.payloadSize) < 2:
             self.payloadSize = '0' + self.payloadSize
         self.finalString = self.messageType + self.senderId + self.receiverId + self.totalPayloads + self.currentPayloadIndex + self.payloadSize
 
