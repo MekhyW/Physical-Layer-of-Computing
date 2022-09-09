@@ -9,7 +9,8 @@ serialName = "COM7"
 
 previousPackageIndex = -1
 
-os.remove("recebido.txt")
+if os.path.exists("recebido.txt"):
+    os.remove("recebido.txt")
 
 com1 = enlace(serialName)
 com1.enable()
@@ -32,7 +33,7 @@ def acknowledge():
         confirmationHead.buildHead()
         confirmation = Datagrama(confirmationHead, '')
         confirmationString = confirmation.head.finalString + confirmation.endOfPackage
-    #print(confirmationString)
+    print(confirmationString)
     com1.sendData(bytes(confirmationString, "utf-8"))
 
 def not_acknowledge():
@@ -93,22 +94,30 @@ def main():
             decoded = rxBuffer.decode()
             datagram = stringToDatagram(decoded)
 
+            print(int(datagram.head.payloadSize))
+            print(len(datagram.payload))
+
             if decoded.startswith('DD'):
                 if decoded.endswith('FEEDBACC'):
-                    if int(datagram.head.currentPayloadIndex) == previousPackageIndex + 1:
-                        print("Pacote {0} recebido com sucesso".format(previousPackageIndex+1))
-                        payload += datagram.payload
-                        acknowledge()
-                        previousPackageIndex += 1
+                    if int(datagram.head.payloadSize) == len(datagram.payload):
+                        if int(datagram.head.currentPayloadIndex) == previousPackageIndex + 1:
+                            print("Pacote {0} recebido com sucesso".format(previousPackageIndex+1))
+                            payload += datagram.payload
+                            acknowledge()
+                            previousPackageIndex += 1
+                            print(previousPackageIndex)
+                        else:
+                            print("Index do pacote errado, pedindo reenvio do pacote")
+                            not_acknowledge()
+                        
+                        print("Current Payload Index:{0}".format(int(datagram.head.currentPayloadIndex) + 1))
+                        print("Total Payload Index: {0}".format(int(datagram.head.totalPayloads)))
+                        if int(datagram.head.currentPayloadIndex) + 1 == int(datagram.head.totalPayloads):
+                            print("Todos pacotes recebidos com sucesso")
+                            break
                     else:
-                        print("Index do pacote errado, pedindo reenvio do pacote")
+                        print("Tamanho do payload errado, pedindo reenvio do pacote")
                         not_acknowledge()
-                    
-                    print("Current Payload Index:{0}".format(int(datagram.head.currentPayloadIndex) + 1))
-                    print("Total Payload Index: {0}".format(int(datagram.head.totalPayloads)))
-                    if int(datagram.head.currentPayloadIndex) + 1 == int(datagram.head.totalPayloads):
-                        print("Todos pacotes recebidos com sucesso")
-                        break
                 else:
                         print("EoP no local errado, pedindo reenvio do pacote")
                         not_acknowledge()
