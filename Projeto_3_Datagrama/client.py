@@ -7,7 +7,7 @@ import numpy as np
 serialName = "COM11"
 com1 = enlace(serialName)
 arquivo = None
-payload_size_limit = 114
+payload_size_limit = 99
 
 def start():
     com1.enable()
@@ -20,9 +20,10 @@ def loadFile():
     global arquivo
     filename = input("Digite o nome do arquivo a ser enviado: ")
     try:
-        with open(filename, "rb") as file:
+        with open(filename, "r") as file:
             arquivo = file.read()
-            print("Arquivo carregado e lido")
+            print(arquivo)
+            print("\nArquivo carregado e lido")
             file.close()
     except FileNotFoundError:
         print("Arquivo não encontrado")
@@ -70,9 +71,11 @@ def main():
         handshake()
         print("Iniciando transmissão de mensagem")
         packages = buildPackages()
-        for package_id in range(len(packages)):
+        package_id = 0
+        while package_id < len(packages):
             com1.sendData(packages[package_id])
-            print("Pacote: {}".format(package_id))
+            #print(packages[package_id])
+            print("Pacote: {} / {}".format(package_id, len(packages)))
             rxLen = 0
             while not rxLen:
                 rxLen = com1.rx.getBufferLen()
@@ -82,10 +85,13 @@ def main():
                 pass
             elif decoded.startswith('99'):
                 package_id -= 1
-            else:
-                print(decoded)
-                raise Exception("Erro: pacote recebido não é de confirmação")
             com1.rx.clearBuffer()
+            package_id += 1
+        
+        print("Pacotes enviados. Aguardando confirmação do servidor...")
+        rxLen = 0
+        while not rxLen:
+            rxLen = com1.rx.getBufferLen()
         print("-------------------------")
         print("Comunicação encerrada")
         print("-------------------------")

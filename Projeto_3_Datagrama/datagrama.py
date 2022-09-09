@@ -28,6 +28,7 @@ class Head:
         while len(self.payloadSize) < 2:
             self.payloadSize = '0' + self.payloadSize
         self.finalString = self.messageType + self.senderId + self.receiverId + self.totalPayloads + self.currentPayloadIndex + self.payloadSize
+        print(self.messageType, self.senderId, self.receiverId, self.totalPayloads, self.currentPayloadIndex, self.payloadSize)
 
 
 class Datagrama:
