@@ -27,6 +27,8 @@ class Head:
             self.currentPayloadIndex = '0' + self.currentPayloadIndex
         while len(self.payloadSize) < 2:
             self.payloadSize = '0' + self.payloadSize
+        #self.currentPayloadIndex = '000000'
+        #self.payloadSize = '00'
         self.finalString = self.messageType + self.senderId + self.receiverId + self.totalPayloads + self.currentPayloadIndex + self.payloadSize
         print(self.messageType, self.senderId, self.receiverId, self.totalPayloads, self.currentPayloadIndex, self.payloadSize)
 

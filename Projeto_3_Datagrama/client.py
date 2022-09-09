@@ -74,7 +74,6 @@ def main():
         package_id = 0
         while package_id < len(packages):
             com1.sendData(packages[package_id])
-            #print(packages[package_id])
             print("Pacote: {} / {}".format(package_id, len(packages)))
             rxLen = 0
             while not rxLen:
@@ -88,10 +87,6 @@ def main():
             com1.rx.clearBuffer()
             package_id += 1
         
-        print("Pacotes enviados. Aguardando confirmação do servidor...")
-        rxLen = 0
-        while not rxLen:
-            rxLen = com1.rx.getBufferLen()
         print("-------------------------")
         print("Comunicação encerrada")
         print("-------------------------")
@@ -99,6 +94,8 @@ def main():
     
     except TimeoutError:
         if "s" in input("Servidor inativo. Tentar novamente? S/N ").lower():
+            com1.sendData(b'00')
+            time.sleep(1)
             main()
         else:
             com1.disable()
