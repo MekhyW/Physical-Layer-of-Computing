@@ -7,7 +7,7 @@ def stringToDatagram(string):
     head.payloadSize = string[18:20]
     head.finalString = string[0:20]
 
-    datagram = Datagrama(head, string[20:(20 + int(head.payloadSize))])
+    datagram = Datagrama(head, string[20:-8])
     datagram.endOfPackage = string[(20 + int(head.payloadSize)):]
 
     return datagram
