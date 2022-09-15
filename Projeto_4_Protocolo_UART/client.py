@@ -2,13 +2,13 @@ from datagrama import *
 from enlace import *
 import time
 import math
-import numpy as np
 
 serialName = "COM11"
 com1 = enlace(serialName)
 arquivo = None
 payload_size_limit = 99
 cont = 0
+numPck = 0
 
 def sacrificeBytes():
     com1.enable()
@@ -113,4 +113,5 @@ if __name__ == "__main__":
         transferPackage(packages[cont-1])
         print("Pacote: {} / {}".format(cont, numPck))
         cont += 1
+    print("SUCESSO!")
     encerrar()

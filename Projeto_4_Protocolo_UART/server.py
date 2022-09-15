@@ -1,154 +1,111 @@
 from enlace import *
 import time
-import numpy as np
 from datagrama import *
 from stringToDatagram import *
 import os
 
-serialName = "COM7"
-
-previousPackageIndex = -1
-
 if os.path.exists("recebido.txt"):
     os.remove("recebido.txt")
-
+serialName = "COM7"
 com1 = enlace(serialName)
-com1.enable()
+ocioso = True
+cont = 0
+numPck = 0
 payload = ''
+previousPackageIndex = -1
+
+def receiveSacrificeBytes():
+    print("Esperando 1 byte de sacrifício")
+    rxBuffer, nRx = com1.getData(1)
+    com1.rx.clearBuffer()
+    time.sleep(.1)
+
+def checkHandshake():
+    #FALTA CHECAR SE MENSAGEM É T1 E SE É PARA MIM, E ATUALIZAR O NUMERO DE PACOTES
+    global ocioso, numPck
+    rxLen = com1.rx.getBufferLen()
+    if not rxLen:
+        return False
+    com1.rx.clearBuffer()
+    print('Handshake recebido do client')
+    ocioso = False
+    return True
 
 def handshake():
+    #FALTA MANDAR TIPO T2
+    global cont
     handshake_head = Head('AA', '55', 'CC')
     handshake_head.buildHead()
     handshake = Datagrama(handshake_head, '')
     com1.sendData(bytes(handshake.head.finalString + handshake.endOfPackage, "utf-8"))
-    print('Handshake recebido, enviando confirmação')
+    print('Confirmação de handshake enviada')
+    cont = 1
 
-def acknowledge():
-    confirmationHead = Head('77', '55', 'CC')
-    confirmationHead.buildHead()
-    confirmation = Datagrama(confirmationHead, '')
-    confirmationString = confirmation.head.finalString + confirmation.endOfPackage
-    while len(confirmationString) < 27:
-        confirmationHead = Head('77', '55', 'CC')
-        confirmationHead.buildHead()
-        confirmation = Datagrama(confirmationHead, '')
-        confirmationString = confirmation.head.finalString + confirmation.endOfPackage
-    print(confirmationString)
-    com1.sendData(bytes(confirmationString, "utf-8"))
+def analisaPacote(datagram, decoded):
+    global payload, previousPackageIndex
+    global cont
+    if not decoded.startswith('DD'):
+        print("Tipo do pacote errado, pedindo reenvio do pacote")
+        #manda mensagem t6
+        return
+    if not decoded.endswith('FEEDBACC'):
+        print("EoP no local errado, pedindo reenvio do pacote")
+        #manda mensagem t6
+        return
+    if not int(datagram.head.payloadSize) == len(datagram.payload):
+        print("Index do pacote errado, pedindo reenvio do pacote")
+        #manda mensagem t6
+        return
+    payload += datagram.payload
+    previousPackageIndex += 1
+    #manda mensagem t4
+    cont += 1
 
-def not_acknowledge():
-    confirmationHead = Head('99', '55', 'CC')
-    confirmationHead.buildHead()
-    confirmation = Datagrama(confirmationHead, '')
-    confirmationString = confirmation.head.finalString + confirmation.endOfPackage
-    while len(confirmationString) < 27:
-        confirmationHead = Head('99', '55', 'CC')
-        confirmationHead.buildHead()
-        confirmation = Datagrama(confirmationHead, '')
-        confirmationString = confirmation.head.finalString + confirmation.endOfPackage
-    #print(confirmationString)
-    com1.sendData(bytes(confirmationString, "utf-8"))
-
-def main():
-    global payload
-    global previousPackageIndex
-    try:
-        #Byte de sacrifício
-        print("Esperando 1 byte de sacrifício")
-        rxBuffer, nRx = com1.getData(1)
-        com1.rx.clearBuffer()
-        time.sleep(.1)
-
-        print("Comunicação aberta com sucesso")
-
-        # Handshake
-        print("Esperando handshake...")
+def receivePackage():
+    global payload, previousPackageIndex
+    global ocioso
+    timer1 = time.time()
+    timer2 = time.time()
+    rxLen = com1.rx.getBufferLen()
+    while not rxLen:
         rxLen = com1.rx.getBufferLen()
-        while rxLen == 0:
-            rxLen = com1.rx.getBufferLen()
-            time.sleep(.5)
-        rxBuffer, nRx = com1.getData(rxLen)
+        tempoatual = time.time()
+        time.sleep(1)
+        if tempoatual - timer2 > 20:
+            ocioso = True
+            #manda mensagem t5
+            print("Timeout :-(")
+            encerrar()
+        elif tempoatual - timer1 > 2:
+            #manda mensagem t4
+            timer1 = tempoatual
+    rxBuffer, nRx = com1.getData(rxLen)
+    decoded = rxBuffer.decode()
+    datagram = stringToDatagram(decoded)
+    com1.rx.clearBuffer()
+    analisaPacote(datagram, decoded)
 
-        decoded = rxBuffer.decode()
-        datagram = stringToDatagram(decoded)
+def salvarArquivo():
+    print("Salvando arquivo")
+    with open("recebido.txt", "w") as arquivo:
+        arquivo.write(payload)
 
-        if decoded.startswith('AA'):
-            handshake()
-        else:
-            raise Exception("Erro: pacote recebido não é handshake")
-        
-        com1.rx.clearBuffer()
-
-        # Recebendo pacotes
-
-        print("Iniciando recebimento de pacotes")
-        print("-----------------------------------------")
-
-        while True:
-            rxLen = com1.rx.getBufferLen()
-            while rxLen == 0:
-                rxLen = com1.rx.getBufferLen()
-                time.sleep(1)
-            rxBuffer, nRx = com1.getData(rxLen)
-
-            decoded = rxBuffer.decode()
-            datagram = stringToDatagram(decoded)
-
-            print(int(datagram.head.payloadSize))
-            print(len(datagram.payload))
-
-            if decoded.startswith('DD'):
-                if decoded.endswith('FEEDBACC'):
-                    if int(datagram.head.payloadSize) == len(datagram.payload):
-                        if int(datagram.head.currentPayloadIndex) == previousPackageIndex + 1:
-                            print("Pacote {0} recebido com sucesso".format(previousPackageIndex+1))
-                            payload += datagram.payload
-                            acknowledge()
-                            previousPackageIndex += 1
-                            print(previousPackageIndex)
-                        else:
-                            print("Index do pacote errado, pedindo reenvio do pacote")
-                            not_acknowledge()
-                        
-                        print("Current Payload Index:{0}".format(int(datagram.head.currentPayloadIndex) + 1))
-                        print("Total Payload Index: {0}".format(int(datagram.head.totalPayloads)))
-                        if int(datagram.head.currentPayloadIndex) + 1 == int(datagram.head.totalPayloads):
-                            print("Todos pacotes recebidos com sucesso")
-                            break
-                    else:
-                        print("Tamanho do payload errado, pedindo reenvio do pacote")
-                        not_acknowledge()
-                else:
-                        print("EoP no local errado, pedindo reenvio do pacote")
-                        not_acknowledge()
-                        
-                print("--------------------------------------------------")    
-                com1.rx.clearBuffer()	
-            else:
-                print("Tipo do pacote errado, pedindo reenvio do pacote")
-                not_acknowledge()
-
-
-        # Salvando arquivo
-        decodedPayload = payload
-        print("Salvando arquivo")
-        with open("recebido.txt", "w") as arquivo:
-            arquivo.write(decodedPayload)
-
-        acknowledge()
-
-        # Encerra comunicação
-        print("-------------------------")
-        print("Comunicação encerrada")
-        print("-------------------------")
-        com1.disable()
-        
-    except Exception as erro:
-        print("ops! :-\\")
-        print(erro)
-        com1.disable()
+def encerrar():
+    print("-------------------------")
+    print("Comunicação encerrada")
+    print("-------------------------")
+    com1.disable()
+    quit()
         
 
-    #so roda o main quando for executado do terminal ... se for chamado dentro de outro modulo nao roda
 if __name__ == "__main__":
-    main()
+    while ocioso:
+        checkHandshake()
+        time.sleep(1)
+    handshake()
+    while cont <= numPck:
+        receivePackage()
+        print("Pacote: {} / {}".format(cont, numPck))
+    salvarArquivo()
+    print("SUCESSO!")
+    encerrar()
