@@ -8,13 +8,21 @@ serialName = "COM11"
 com1 = enlace(serialName)
 arquivo = None
 payload_size_limit = 99
+cont = 0
 
-def start():
+def sacrificeBytes():
     com1.enable()
     time.sleep(.2)
     com1.sendData(b'00')
     time.sleep(1)
     print("Bytes de sacrifício enviados")
+
+def askStart():
+    global cont
+    if input('Iniciar? S/N ').lower() == 's':
+        cont = 1
+    elif handshake():
+        cont = 1
 
 def loadFile():
     global arquivo
@@ -30,25 +38,24 @@ def loadFile():
         quit()
 
 def handshake():
+    #FALTA MANDAR TIPO T1 E CHECAR SE RESPOSTA É T2
     handshake_head = Head('AA', 'CC', '55')
     handshake_head.buildHead()
     handshake = Datagrama(handshake_head, '')
     com1.sendData(bytes(handshake.head.finalString + handshake.endOfPackage, "utf-8"))
     print('Handshake enviado, aguardando resposta do servidor...')
-    timer=0
-    print(timer)
+    time.sleep(5)
     rxLen = com1.rx.getBufferLen()
-    while not rxLen:
-        rxLen = com1.rx.getBufferLen()
-        time.sleep(1)
-        timer += 1
-        print(timer)
-        if timer >= 5:
-            raise TimeoutError
+    if not rxLen:
+        print("Servidor inativo")
+        return False
     com1.rx.clearBuffer()
+    print('Handshake recebido, servidor ativo')
+    return True
 
 
 def buildPackages():
+    #FALTA FAZER CADA PACOTE MONTADO SER TIPO T3
     packages = []
     totalPayloads = math.ceil(len(arquivo)/payload_size_limit)
     for i in range(totalPayloads):
@@ -66,49 +73,44 @@ def buildPackages():
     return packages
         
 
-def main():
-    try:
-        handshake()
-        print("Iniciando transmissão de mensagem")
-        packages = buildPackages()
-        package_id = 0
-        while package_id < len(packages):
-            com1.sendData(packages[package_id])
-            print("Pacote: {} / {}".format(package_id, len(packages)))
-            rxLen = 0
-            while not rxLen:
-                rxLen = com1.rx.getBufferLen()
-            rxBuffer, nRx = com1.getData(rxLen)
-            decoded = rxBuffer.decode()
-            if decoded.startswith('77'):
-                pass
-            elif decoded.startswith('99'):
-                package_id -= 1
-            com1.rx.clearBuffer()
-            package_id += 1
+def transferPackage(package):
+    global cont
+    com1.sendData(package)
+    timer1 = time.time()
+    timer2 = time.time()
+    rxLen = 0
+    while not rxLen:
+        rxLen = com1.rx.getBufferLen()
+        tempoatual = time.time()
+        if tempoatual - timer1 > 5:
+            com1.sendData(package)
+            timer1 = tempoatual
+        if tempoatual - timer2 > 10:
+            #mandar mensagem de timeout aqui
+            print("Timeout :-(")
+            encerrar()
+        elif rxLen:
+            #se for t6, cont-=1 e com1.sendData(package)
+            pass
+    com1.rx.clearBuffer()
         
-        print("-------------------------")
-        print("Comunicação encerrada")
-        print("-------------------------")
-        com1.disable()
-    
-    except TimeoutError:
-        if "s" in input("Servidor inativo. Tentar novamente? S/N ").lower():
-            com1.sendData(b'00')
-            time.sleep(1)
-            main()
-        else:
-            com1.disable()
-            quit()
+def encerrar():
+    print("-------------------------")
+    print("Comunicação encerrada")
+    print("-------------------------")
+    com1.disable()
+    quit()
 
-    except Exception as erro:
-        print("ops! :-\\")
-        print(erro)
-        com1.disable()
-        
-
-#so roda o main quando for executado do terminal ... se for chamado dentro de outro modulo nao roda
 if __name__ == "__main__":
-    start()
+    sacrificeBytes()
+    while not cont:
+        askStart()
     loadFile()
-    main()
+    packages = buildPackages()
+    numPck = len(packages)
+    print("Iniciando transmissão de mensagem")
+    while cont <= numPck:
+        transferPackage(packages[cont-1])
+        print("Pacote: {} / {}".format(cont, numPck))
+        cont += 1
+    encerrar()
