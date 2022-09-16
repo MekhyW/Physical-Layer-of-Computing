@@ -17,16 +17,15 @@ class Head:
         self.h2 = receiverId
         self.h3 = totalPackages
         self.h4 = currentPackageIndex
-        match self.h0:
-            case '01' | '02':
-                self.h5 = fileId
-            case '03':
-                if payloadSize == '00':
-                    raise Exception("Error: Message type does not support non-0 payload")
-                else:
-                    self.h5 = payloadSize
-            case _:
-                self.h5 = '00'
+        if self.h0 in ['01', '02']:
+            self.h5 = fileId
+        elif self.h0 == '03':
+            if payloadSize == '00':
+                raise Exception("Error: Message type does not support non-0 payload")
+            else:
+                self.h5 = payloadSize
+        else:
+            self.h5 = '00'
         self.h6 = restartPackage
         self.h7 = lastVerifiedPackage
         self.head = self.h0 + self.h1 + self.h2 + self.h3 + self.h4 + self.h5 + self.h6 + self.h7 + self.h8 + self.h9
