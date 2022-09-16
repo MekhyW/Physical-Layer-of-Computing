@@ -1,11 +1,12 @@
 from enlace import *
 import time
-from datagrama import *
-from stringToDatagram import *
+from neoDatagram import *
+from neoStringToDatagram import *
 import os
 
 if os.path.exists("recebido.txt"):
     os.remove("recebido.txt")
+    
 serialName = "COM7"
 com1 = enlace(serialName)
 ocioso = True
@@ -13,52 +14,65 @@ cont = 0
 numPck = 0
 payload = ''
 previousPackageIndex = -1
+fileId = ''
 
 def receiveSacrificeBytes():
-    print("Esperando 1 byte de sacrifício")
+    print('Esperando 1 byte de sacrifício')
     rxBuffer, nRx = com1.getData(1)
     com1.rx.clearBuffer()
     time.sleep(.1)
 
 def checkHandshake():
-    #FALTA CHECAR SE MENSAGEM É T1 E SE É PARA MIM, E ATUALIZAR O NUMERO DE PACOTES
-    global ocioso, numPck
+    global ocioso, numPck, fileId
     rxLen = com1.rx.getBufferLen()
-    if not rxLen:
-        return False
+    rxBuffer, nRx = com1.getData(rxLen)
+    t1 = rxBuffer.decode()
+    if t1.startswith('01CC55') and t1.endswith('AABBCCDD'):
+        print('Handshake recebido do client')
+        fileId = t1[10:12]
+        print('Id do arquivo: {}'.format(fileId))
+        numPck = int(t1[7:9], 16)
+        print('Número de pacotes a serem recebidos: {}'.format(numPck))
+        ocioso = False
+    else:
+        print('Mensagem não é handshake, ignorada')
+        ocioso = True
     com1.rx.clearBuffer()
-    print('Handshake recebido do client')
-    ocioso = False
-    return True
-
+    
 def handshake():
-    #FALTA MANDAR TIPO T2
-    global cont
-    handshake_head = Head('AA', '55', 'CC')
-    handshake_head.buildHead()
-    handshake = Datagrama(handshake_head, '')
-    com1.sendData(bytes(handshake.head.finalString + handshake.endOfPackage, "utf-8"))
+    global cont, fileId
+    t2Head = Head('02', '55', 'CC', '00', '00', '00', '00', '00', fileId=fileId)
+    t2 = Datagram(t2Head, '')
+    com1.sendData(bytes(t2.datagram, "utf-8"))
     print('Confirmação de handshake enviada')
     cont = 1
 
 def analisaPacote(datagram, decoded):
     global payload, previousPackageIndex
     global cont
-    if not decoded.startswith('DD'):
-        print("Tipo do pacote errado, pedindo reenvio do pacote")
-        #manda mensagem t6
+    if not decoded.startswith('03'):
+        print("Tipo do pacote errado, pedindo reenvio")
+        t6Head = Head('06', '55', 'CC', '00', '00', '00', '00', '00')
+        t6 = Datagram(t6Head, '')
+        com1.sendData(bytes(t6.datagram, "utf-8"))
         return
     if not decoded.endswith('FEEDBACC'):
         print("EoP no local errado, pedindo reenvio do pacote")
-        #manda mensagem t6
+        t6Head = Head('06', '55', 'CC', '00', '00', '00', '00', '00')
+        t6 = Datagram(t6Head, '')
+        com1.sendData(bytes(t6.datagram, "utf-8"))
         return
-    if not int(datagram.head.payloadSize) == len(datagram.payload):
+    if not int(datagram.head.h5) == len(datagram.payload):
         print("Index do pacote errado, pedindo reenvio do pacote")
-        #manda mensagem t6
+        t6Head = Head('06', '55', 'CC', '00', '00', '00', '00', '00')
+        t6 = Datagram(t6Head, '')
+        com1.sendData(bytes(t6.datagram, "utf-8"))
         return
     payload += datagram.payload
     previousPackageIndex += 1
-    #manda mensagem t4
+    t4Head = Head('04', '55', 'CC', '00', '00', '00', '00', previousPackageIndex)
+    t4 = Datagram(t4Head, '')
+    com1.sendData(bytes(t4.datagram, "utf-8"))
     cont += 1
 
 def receivePackage():
@@ -73,15 +87,19 @@ def receivePackage():
         time.sleep(1)
         if tempoatual - timer2 > 20:
             ocioso = True
-            #manda mensagem t5
+            t5Head = Head('05', '55', 'CC', '00', '00', '00', '00', '00')
+            t5 = Datagram(t5Head, '')
+            com1.sendData(bytes(t5.datagram, "utf-8"))
             print("Timeout :-(")
             encerrar()
         elif tempoatual - timer1 > 2:
-            #manda mensagem t4
+            t4Head = Head('04', '55', 'CC', '00', '00', '00', '00', previousPackageIndex)
+            t4 = Datagram(t4Head, '')
+            com1.sendData(bytes(t4.datagram, "utf-8"))
             timer1 = tempoatual
     rxBuffer, nRx = com1.getData(rxLen)
     decoded = rxBuffer.decode()
-    datagram = stringToDatagram(decoded)
+    datagram = neoStringToDatagram(decoded)
     com1.rx.clearBuffer()
     analisaPacote(datagram, decoded)
 
@@ -96,7 +114,6 @@ def encerrar():
     print("-------------------------")
     com1.disable()
     quit()
-        
 
 if __name__ == "__main__":
     while ocioso:
