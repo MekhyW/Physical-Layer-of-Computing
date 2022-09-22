@@ -9,7 +9,7 @@ class Head:
     h7: str = '00'    # Último pacote recebido e verificado com sucesso - começa em 00
     h8: str = '00'    # Em branco, será parte do Projeto 5 (CRC)
     h9: str = '00'    # Em branco, será parte do Projeto 5 (CRC)
-    head: str
+    fullHead: str
 
     def __init__(self, messageType, senderId, receiverId, totalPackages, currentPackageIndex, payloadSize, restartPackage, lastVerifiedPackage, fileId='00'):
         self.h0 = messageType
@@ -28,7 +28,7 @@ class Head:
             self.h5 = '00'
         self.h6 = restartPackage
         self.h7 = lastVerifiedPackage
-        self.head = self.h0 + self.h1 + self.h2 + self.h3 + self.h4 + self.h5 + self.h6 + self.h7 + self.h8 + self.h9
+        self.fullHead = self.h0 + self.h1 + self.h2 + self.h3 + self.h4 + self.h5 + self.h6 + self.h7 + self.h8 + self.h9
 
 class Datagram:
     head: Head

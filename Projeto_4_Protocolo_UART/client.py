@@ -1,4 +1,4 @@
-from datagrama import *
+from neoDatagram import *
 from enlace import *
 import time
 import math
@@ -9,6 +9,7 @@ arquivo = None
 payload_size_limit = 99
 cont = 0
 numPck = 0
+fileId = ''
 
 def sacrificeBytes():
     com1.enable()
@@ -39,10 +40,10 @@ def loadFile():
 
 def handshake():
     #FALTA MANDAR TIPO T1 E CHECAR SE RESPOSTA É T2
-    handshake_head = Head('AA', 'CC', '55')
-    handshake_head.buildHead()
-    handshake = Datagrama(handshake_head, '')
-    com1.sendData(bytes(handshake.head.finalString + handshake.endOfPackage, "utf-8"))
+    global fileId
+    handshakeHead = Head('01', 'CC', '55', '00', '00', '00', '00', '00', fileId=fileId)
+    handshake = Datagram(handshakeHead, '')
+    com1.sendData(bytes(handshake.datagram, "utf-8"))
     print('Handshake enviado, aguardando resposta do servidor...')
     time.sleep(5)
     rxLen = com1.rx.getBufferLen()
@@ -59,17 +60,15 @@ def buildPackages():
     packages = []
     totalPayloads = math.ceil(len(arquivo)/payload_size_limit)
     for i in range(totalPayloads):
-        head = Head('DD', 'CC', '55')
         payload = ''
         for j in range(payload_size_limit):
             try:
                 payload += str(arquivo[i*payload_size_limit+j])
             except IndexError:
                 break
-        head.payloadData(totalPayloads, i, payload)
-        head.buildHead()
-        datagram = Datagrama(head, payload)
-        packages.append(bytes(datagram.head.finalString + datagram.payload + datagram.endOfPackage, "utf-8"))
+        head = Head('03', 'CC', '55', str(totalPayloads), str(i).zfill(2), str(len(payload)), '00', '00')
+        datagram = Datagram(head, payload)
+        packages.append(bytes(datagram.datagram, "utf-8"))
     return packages
         
 

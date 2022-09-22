@@ -41,9 +41,9 @@ def checkHandshake():
     
 def handshake():
     global cont, fileId
-    t2Head = Head('02', '55', 'CC', '00', '00', '00', '00', '00', fileId=fileId)
-    t2 = Datagram(t2Head, '')
-    com1.sendData(bytes(t2.datagram, "utf-8"))
+    handshakeHead = Head('02', '55', 'CC', '00', '00', '00', '00', '00', fileId=fileId)
+    handshake = Datagram(handshakeHead, '')
+    com1.sendData(bytes(handshake.datagram, "utf-8"))
     print('Confirmação de handshake enviada')
     cont = 1
 
@@ -62,7 +62,7 @@ def analisaPacote(datagram, decoded):
         t6 = Datagram(t6Head, '')
         com1.sendData(bytes(t6.datagram, "utf-8"))
         return
-    if not int(datagram.head.h5) == len(datagram.payload):
+    if not int(datagram.fullHead.h5) == len(datagram.payload):
         print("Index do pacote errado, pedindo reenvio do pacote")
         t6Head = Head('06', '55', 'CC', '00', '00', '00', '00', '00')
         t6 = Datagram(t6Head, '')
