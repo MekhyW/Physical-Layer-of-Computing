@@ -34,9 +34,9 @@ class Datagram:
     head: Head
     payload: str = ''
     endOfPackage: str = 'AABBCCDD'
-    datagram = str
+    fullPackage = str
 
     def __init__(self, head, payload):
         self.head = head
         self.payload = payload
-        self.datagram = self.head.head + self.payload + self.endOfPackage
+        self.fullPackage = self.head.fullHead + self.payload + self.endOfPackage

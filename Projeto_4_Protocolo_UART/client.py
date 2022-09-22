@@ -26,8 +26,10 @@ def askStart():
         cont = 1
 
 def loadFile():
-    global arquivo
+    global arquivo, fileId
     filename = input("Digite o nome do arquivo a ser enviado: ")
+    while len(fileId) != 2:
+        fileId = input("Digite o ID do arquivo (2 dígitos): ")
     try:
         with open(filename, "r") as file:
             arquivo = file.read()

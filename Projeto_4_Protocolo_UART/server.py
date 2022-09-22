@@ -43,7 +43,7 @@ def handshake():
     global cont, fileId
     handshakeHead = Head('02', '55', 'CC', '00', '00', '00', '00', '00', fileId=fileId)
     handshake = Datagram(handshakeHead, '')
-    com1.sendData(bytes(handshake.datagram, "utf-8"))
+    com1.sendData(bytes(handshake.fullPackage, "utf-8"))
     print('Confirmação de handshake enviada')
     cont = 1
 
@@ -54,25 +54,25 @@ def analisaPacote(datagram, decoded):
         print("Tipo do pacote errado, pedindo reenvio")
         t6Head = Head('06', '55', 'CC', '00', '00', '00', '00', '00')
         t6 = Datagram(t6Head, '')
-        com1.sendData(bytes(t6.datagram, "utf-8"))
+        com1.sendData(bytes(t6.fullPackage, "utf-8"))
         return
     if not decoded.endswith('FEEDBACC'):
         print("EoP no local errado, pedindo reenvio do pacote")
         t6Head = Head('06', '55', 'CC', '00', '00', '00', '00', '00')
         t6 = Datagram(t6Head, '')
-        com1.sendData(bytes(t6.datagram, "utf-8"))
+        com1.sendData(bytes(t6.fullPackage, "utf-8"))
         return
-    if not int(datagram.fullHead.h5) == len(datagram.payload):
+    if not int(datagram.head.h5) == len(datagram.payload):
         print("Index do pacote errado, pedindo reenvio do pacote")
         t6Head = Head('06', '55', 'CC', '00', '00', '00', '00', '00')
         t6 = Datagram(t6Head, '')
-        com1.sendData(bytes(t6.datagram, "utf-8"))
+        com1.sendData(bytes(t6.fullPackage, "utf-8"))
         return
     payload += datagram.payload
     previousPackageIndex += 1
     t4Head = Head('04', '55', 'CC', '00', '00', '00', '00', previousPackageIndex)
     t4 = Datagram(t4Head, '')
-    com1.sendData(bytes(t4.datagram, "utf-8"))
+    com1.sendData(bytes(t4.fullPackage, "utf-8"))
     cont += 1
 
 def receivePackage():
@@ -89,13 +89,13 @@ def receivePackage():
             ocioso = True
             t5Head = Head('05', '55', 'CC', '00', '00', '00', '00', '00')
             t5 = Datagram(t5Head, '')
-            com1.sendData(bytes(t5.datagram, "utf-8"))
+            com1.sendData(bytes(t5.fullPackage, "utf-8"))
             print("Timeout :-(")
             encerrar()
         elif tempoatual - timer1 > 2:
             t4Head = Head('04', '55', 'CC', '00', '00', '00', '00', previousPackageIndex)
             t4 = Datagram(t4Head, '')
-            com1.sendData(bytes(t4.datagram, "utf-8"))
+            com1.sendData(bytes(t4.fullPackage, "utf-8"))
             timer1 = tempoatual
     rxBuffer, nRx = com1.getData(rxLen)
     decoded = rxBuffer.decode()
