@@ -45,7 +45,7 @@ def handshake():
     global fileId
     handshakeHead = Head('01', 'CC', '55', '00', '00', '00', '00', '00', fileId=fileId)
     handshake = Datagram(handshakeHead, '')
-    com1.sendData(bytes(handshake.datagram, "utf-8"))
+    com1.sendData(bytes(handshake.fullPackage, "utf-8"))
     print('Handshake enviado, aguardando resposta do servidor...')
     time.sleep(5)
     rxLen = com1.rx.getBufferLen()
@@ -70,7 +70,7 @@ def buildPackages():
                 break
         head = Head('03', 'CC', '55', str(totalPayloads), str(i).zfill(2), str(len(payload)), '00', '00')
         datagram = Datagram(head, payload)
-        packages.append(bytes(datagram.datagram, "utf-8"))
+        packages.append(bytes(datagram.fullPackage, "utf-8"))
     return packages
         
 
