@@ -23,7 +23,10 @@ lastValidatedPackage = 0
 
 def receiveSacrificeBytes():
     print('Esperando 1 byte de sacrifício')
+    com1.enable()
+    time.sleep(.2)
     rxBuffer, nRx = com1.getData(1)
+    print(rxBuffer)
     com1.rx.clearBuffer()
     time.sleep(.1)
 
@@ -33,6 +36,7 @@ def checkHandshake():
     rxBuffer, nRx = com1.getData(rxLen)
     packageString = rxBuffer.decode()
     packageDatagram = neoStringToDatagram(packageString)
+    print(packageString)
     if packageString.startswith('01CC55') and packageString.endswith('AABBCCDD'):
         if validatePackage(packageDatagram, restartPackage = restartPackage, lastValidatedPackage = lastValidatedPackage):
             print('Handshake recebido do client')
@@ -127,14 +131,19 @@ def encerrar():
     quit()
 
 if __name__ == "__main__":
-    receiveSacrificeBytes()
-    while ocioso:
-        checkHandshake()
-        time.sleep(1)
-    handshake()
-    while cont <= totalPackages:
-        receivePackage()
-        print("Pacote: {} / {}".format(cont, totalPackages))
-    salvarArquivo()
-    print("SUCESSO!")
-    encerrar()
+    try:
+        receiveSacrificeBytes()
+        while ocioso:
+            checkHandshake()
+            time.sleep(1)
+        handshake()
+        while cont <= totalPackages:
+            receivePackage()
+            print("Pacote: {} / {}".format(cont, totalPackages))
+        salvarArquivo()
+        print("SUCESSO!")
+        encerrar()
+    except Exception as erro:
+        print("ops! :-\\")
+        print(erro)
+        encerrar()

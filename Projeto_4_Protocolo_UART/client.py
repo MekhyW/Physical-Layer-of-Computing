@@ -8,8 +8,11 @@ com1 = enlace(serialName)
 arquivo = None
 payload_size_limit = 99
 cont = 0
-numPck = 0
 fileId = ''
+
+totalPackages = 0
+restartPackage = 1
+lastValidatedPackage = 0
 
 def sacrificeBytes():
     com1.enable()
@@ -41,8 +44,8 @@ def loadFile():
         quit()
 
 def handshake():
-    global fileId
-    handshakeHead = Head('01', 'CC', '55', '00', '00', '00', '00', '00', fileId=fileId)
+    global fileId, totalPackages, restartPackage, lastValidatedPackage
+    handshakeHead = Head('01', 'CC', '55', str(totalPackages).zfill(2), '00', '00', str(restartPackage).zfill(2), str(lastValidatedPackage).zfill(2), fileId=fileId)
     handshake = Datagram(handshakeHead, '')
     com1.sendData(bytes(handshake.fullPackage, "utf-8"))
     print('Handshake enviado, aguardando resposta do servidor...')
@@ -57,6 +60,7 @@ def handshake():
 
 
 def buildPackages():
+    global totalPayloads, restartPackage, lastValidatedPackage
     packages = []
     totalPayloads = math.ceil(len(arquivo)/payload_size_limit)
     for i in range(totalPayloads):
@@ -66,14 +70,14 @@ def buildPackages():
                 payload += str(arquivo[i*payload_size_limit+j])
             except IndexError:
                 break
-        head = Head('03', 'CC', '55', str(totalPayloads), str(i).zfill(2), str(len(payload)), '00', '00')
+        head = Head('03', 'CC', '55', str(totalPayloads), str(i).zfill(2), str(len(payload)), str(restartPackage).zfill(2), str(lastValidatedPackage).zfill(2))
         datagram = Datagram(head, payload)
         packages.append(bytes(datagram.fullPackage, "utf-8"))
     return packages
         
 
 def transferPackage(package):
-    global cont
+    global cont, totalPayloads, restartPackage, lastValidatedPackage
     com1.sendData(package)
     timer1 = time.time()
     timer2 = time.time()
@@ -85,7 +89,7 @@ def transferPackage(package):
             com1.sendData(package)
             timer1 = tempoatual
         if tempoatual - timer2 > 10:
-            timeoutHead = Head('05', 'CC', '55', '00', '00', '00', '00', '00')
+            timeoutHead = Head('05', 'CC', '55', str(totalPackages).zfill(2), '00', '00', str(restartPackage).zfill(2), str(lastValidatedPackage).zfill(2))
             timeout = Datagram(timeoutHead, '')
             com1.sendData(bytes(timeout.fullPackage, "utf-8"))
             print("Timeout :-(")
@@ -110,11 +114,11 @@ if __name__ == "__main__":
         askStart()
     loadFile()
     packages = buildPackages()
-    numPck = len(packages)
+    totalPackages = len(packages)
     print("Iniciando transmissão de mensagem")
-    while cont <= numPck:
+    while cont <= totalPackages:
         transferPackage(packages[cont-1])
-        print("Pacote: {} / {}".format(cont, numPck))
+        print("Pacote: {} / {}".format(cont, totalPackages))
         cont += 1
     print("SUCESSO!")
     encerrar()
