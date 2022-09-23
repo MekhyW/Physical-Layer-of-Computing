@@ -21,13 +21,6 @@ def sacrificeBytes():
     time.sleep(1)
     print("Bytes de sacrifício enviados")
 
-def askStart():
-    global cont
-    if input('Iniciar? S/N ').lower() == 's':
-        cont = 1
-    elif handshake():
-        cont = 1
-
 def loadFile():
     global arquivo, fileId
     filename = input("Digite o nome do arquivo a ser enviado: ")
@@ -111,7 +104,8 @@ def encerrar():
 if __name__ == "__main__":
     sacrificeBytes()
     while not cont:
-        askStart()
+        if handshake():
+            cont = 1
     loadFile()
     packages = buildPackages()
     totalPackages = len(packages)
