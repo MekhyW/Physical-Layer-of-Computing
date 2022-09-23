@@ -13,7 +13,7 @@ serialName = "COM8"
 com1 = enlace(serialName)
 ocioso = True
 cont = 0
-log = open("serverlog.txt", "w")
+log = open("serverlog.txt", "w", encoding="utf-8")
 
 payload = ''
 fileId = ''
