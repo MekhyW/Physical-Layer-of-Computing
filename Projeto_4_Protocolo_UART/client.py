@@ -3,6 +3,9 @@ from enlace import *
 import time
 import math
 
+from neoStringToDatagram import neoStringToDatagram
+from validatePackage import validatePackage
+
 serialName = "COM12"
 com1 = enlace(serialName)
 arquivo = None
@@ -75,23 +78,27 @@ def transferPackage(package):
     timer1 = time.time()
     timer2 = time.time()
     rxLen = 0
-    while not rxLen:
-        rxLen = com1.rx.getBufferLen()
-        tempoatual = time.time()
-        if tempoatual - timer1 > 5:
-            com1.sendData(package)
-            timer1 = tempoatual
-        if tempoatual - timer2 > 10:
-            timeoutHead = Head('05', 'CC', '55', str(totalPackages).zfill(2), '00', '00', str(restartPackage).zfill(2), str(lastValidatedPackage).zfill(2))
-            timeout = Datagram(timeoutHead, '')
-            com1.sendData(bytes(timeout.fullPackage, "utf-8"))
-            print("Timeout :-(")
-            encerrar()
-        elif rxLen:
-            rxBuffer, nRx = com1.getData(rxLen)
-            packageString = rxBuffer.decode()
-            if packageString.startswith('06'):
-                cont -= 1
+    packageValidity = False
+    while not packageValidity:
+        while not rxLen:
+            rxLen = com1.rx.getBufferLen()
+            tempoatual = time.time()
+            if tempoatual - timer1 > 5:
+                com1.sendData(package)
+                timer1 = tempoatual
+            if tempoatual - timer2 > 10:
+                timeoutHead = Head('05', 'CC', '55', str(totalPackages).zfill(2), '00', '00', str(restartPackage).zfill(2), str(lastValidatedPackage).zfill(2))
+                timeout = Datagram(timeoutHead, '')
+                com1.sendData(bytes(timeout.fullPackage, "utf-8"))
+                print("Timeout :-(")
+                encerrar()
+            elif rxLen:
+                rxBuffer, nRx = com1.getData(rxLen)
+                packageString = rxBuffer.decode()
+                packageDatagram = neoStringToDatagram(packageString)
+                packageValidity = validatePackage(packageDatagram, restartPackage = restartPackage, lastValidatedPackage = lastValidatedPackage)
+                if packageString.startswith('06'):
+                    cont -= 1
     com1.rx.clearBuffer()
         
 def encerrar():
@@ -103,12 +110,12 @@ def encerrar():
 
 if __name__ == "__main__":
     sacrificeBytes()
-    while not cont:
-        if handshake():
-            cont = 1
     loadFile()
     packages = buildPackages()
     totalPackages = len(packages)
+    while not cont:
+        if handshake():
+            cont = 1
     print("Iniciando transmissão de mensagem")
     while cont <= totalPackages:
         transferPackage(packages[cont-1])
