@@ -47,7 +47,7 @@ def handshake():
     print('Confirmação de handshake enviada')
     cont = 1
 
-def analisaPacote(datagram, decoded):
+def analisaPacote(datagram : Datagram, decoded : str):
     global payload, previousPackageIndex
     global cont
     if not decoded.startswith('03'):
