@@ -9,13 +9,12 @@ from validatePackage import validatePackage
 if os.path.exists("recebido.txt"):
     os.remove("recebido.txt")
     
-serialName = "COM7"
+serialName = "COM8"
 com1 = enlace(serialName)
 ocioso = True
 cont = 0
 
 payload = ''
-previousPackageIndex = -1
 fileId = ''
 
 totalPackages = 0
@@ -59,57 +58,60 @@ def handshake():
     cont = 1
 
 def analisaPacote(datagram : Datagram, decoded : str):
-    global payload, previousPackageIndex, cont
+    global payload, cont, totalPackages, restartPackage, lastValidatedPackage
     if not decoded.startswith('03'):
         print("Tipo do pacote errado, pedindo reenvio")
-        t6Head = Head('06', '55', 'CC', '00', '00', '00', '00', '00')
+        t6Head = Head('06', '55', 'CC', str(totalPackages).zfill(2), '00', '00', str(restartPackage).zfill(2), str(lastValidatedPackage).zfill(2))
         t6 = Datagram(t6Head, '')
         com1.sendData(bytes(t6.fullPackage, "utf-8"))
         return
     if not decoded.endswith('FEEDBACC'):
         print("EoP no local errado, pedindo reenvio do pacote")
-        t6Head = Head('06', '55', 'CC', '00', '00', '00', '00', '00')
+        t6Head = Head('06', '55', 'CC', str(totalPackages).zfill(2), '00', '00', str(restartPackage).zfill(2), str(lastValidatedPackage).zfill(2))
         t6 = Datagram(t6Head, '')
         com1.sendData(bytes(t6.fullPackage, "utf-8"))
         return
     if not int(datagram.head.h5) == len(datagram.payload):
         print("Index do pacote errado, pedindo reenvio do pacote")
-        t6Head = Head('06', '55', 'CC', '00', '00', '00', '00', '00')
+        t6Head = Head('06', '55', 'CC', str(totalPackages).zfill(2), '00', '00', str(restartPackage).zfill(2), str(lastValidatedPackage).zfill(2))
         t6 = Datagram(t6Head, '')
         com1.sendData(bytes(t6.fullPackage, "utf-8"))
         return
     payload += datagram.payload
-    previousPackageIndex += 1
-    t4Head = Head('04', '55', 'CC', '00', '00', '00', '00', previousPackageIndex)
+    lastValidatedPackage += 1
+    t4Head = Head('04', '55', 'CC', str(totalPackages).zfill(2), '00', '00', str(restartPackage).zfill(2), str(lastValidatedPackage).zfill(2))
     t4 = Datagram(t4Head, '')
     com1.sendData(bytes(t4.fullPackage, "utf-8"))
     cont += 1
 
 def receivePackage():
-    global payload, previousPackageIndex, ocioso, totalPackages, restartPackage, lastValidatedPackage
+    global payload, ocioso, totalPackages, restartPackage, lastValidatedPackage
     timer1 = time.time()
     timer2 = time.time()
     rxLen = com1.rx.getBufferLen()
-    while not rxLen:
-        rxLen = com1.rx.getBufferLen()
-        tempoatual = time.time()
-        time.sleep(1)
-        if tempoatual - timer2 > 20:
-            ocioso = True
-            t5Head = Head('05', '55', 'CC', str(totalPackages).zfill(2), '00', '00', str(restartPackage).zfill(2), str(lastValidatedPackage).zfill(2))
-            t5 = Datagram(t5Head, '')
-            com1.sendData(bytes(t5.fullPackage, "utf-8"))
-            print("Timeout :-(")
-            encerrar()
-        elif tempoatual - timer1 > 2:
-            t4Head = Head('04', '55', 'CC', str(totalPackages).zfill(2), '00', '00', str(restartPackage).zfill(2), str(lastValidatedPackage).zfill(2))
-            t4 = Datagram(t4Head, '')
-            com1.sendData(bytes(t4.fullPackage, "utf-8"))
-            timer1 = tempoatual
-    rxBuffer, nRx = com1.getData(rxLen)
-    packageString = rxBuffer.decode()
-    packageDatagram = neoStringToDatagram(packageString)
-    com1.rx.clearBuffer()
+    packageValidity = False
+    while not packageValidity:
+        while not rxLen:
+            rxLen = com1.rx.getBufferLen()
+            tempoatual = time.time()
+            time.sleep(1)
+            if tempoatual - timer2 > 20:
+                ocioso = True
+                t5Head = Head('05', '55', 'CC', str(totalPackages).zfill(2), '00', '00', str(restartPackage).zfill(2), str(lastValidatedPackage).zfill(2))
+                t5 = Datagram(t5Head, '')
+                com1.sendData(bytes(t5.fullPackage, "utf-8"))
+                print("Timeout :-(")
+                encerrar()
+            elif tempoatual - timer1 > 2:
+                t4Head = Head('04', '55', 'CC', str(totalPackages).zfill(2), '00', '00', str(restartPackage).zfill(2), str(lastValidatedPackage).zfill(2))
+                t4 = Datagram(t4Head, '')
+                com1.sendData(bytes(t4.fullPackage, "utf-8"))
+                timer1 = tempoatual
+        rxBuffer, nRx = com1.getData(rxLen)
+        packageString = rxBuffer.decode()
+        packageDatagram = neoStringToDatagram(packageString)
+        packageValidity = validatePackage(packageDatagram, restartPackage = restartPackage, lastValidatedPackage = lastValidatedPackage)
+        com1.rx.clearBuffer()
     analisaPacote(packageDatagram, packageString)
 
 def salvarArquivo():

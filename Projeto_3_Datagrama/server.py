@@ -5,7 +5,7 @@ from datagrama import *
 from stringToDatagram import *
 import os
 
-serialName = "COM7"
+serialName = "COM8"
 
 previousPackageIndex = -1
 
