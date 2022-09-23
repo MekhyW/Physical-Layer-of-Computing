@@ -3,7 +3,7 @@ from enlace import *
 import time
 import math
 
-serialName = "COM11"
+serialName = "COM12"
 com1 = enlace(serialName)
 arquivo = None
 payload_size_limit = 99
@@ -41,7 +41,6 @@ def loadFile():
         quit()
 
 def handshake():
-    #FALTA MANDAR TIPO T1 E CHECAR SE RESPOSTA É T2
     global fileId
     handshakeHead = Head('01', 'CC', '55', '00', '00', '00', '00', '00', fileId=fileId)
     handshake = Datagram(handshakeHead, '')
@@ -49,7 +48,7 @@ def handshake():
     print('Handshake enviado, aguardando resposta do servidor...')
     time.sleep(5)
     rxLen = com1.rx.getBufferLen()
-    if not rxLen:
+    if not rxLen or not com1.getData(rxLen)[0].decode().startswith('02'):
         print("Servidor inativo")
         return False
     com1.rx.clearBuffer()
@@ -58,7 +57,6 @@ def handshake():
 
 
 def buildPackages():
-    #FALTA FAZER CADA PACOTE MONTADO SER TIPO T3
     packages = []
     totalPayloads = math.ceil(len(arquivo)/payload_size_limit)
     for i in range(totalPayloads):
@@ -87,12 +85,16 @@ def transferPackage(package):
             com1.sendData(package)
             timer1 = tempoatual
         if tempoatual - timer2 > 10:
-            #mandar mensagem de timeout aqui
+            timeoutHead = Head('05', 'CC', '55', '00', '00', '00', '00', '00')
+            timeout = Datagram(timeoutHead, '')
+            com1.sendData(bytes(timeout.fullPackage, "utf-8"))
             print("Timeout :-(")
             encerrar()
         elif rxLen:
-            #se for t6, cont-=1 e com1.sendData(package)
-            pass
+            rxBuffer, nRx = com1.getData(rxLen)
+            packageString = rxBuffer.decode()
+            if packageString.startswith('06'):
+                cont -= 1
     com1.rx.clearBuffer()
         
 def encerrar():
