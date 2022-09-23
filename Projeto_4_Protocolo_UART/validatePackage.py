@@ -25,14 +25,14 @@ def validatePackage(package : Datagram, restartPackage = 1, lastValidatedPackage
                         print("Erro: Pacote inválido - pacote de dados com payload vazio")
                         return False
             elif package.head.h0 == "01":
-                if package.head.h3 == "55":
+                if package.head.h2 == "55":
                     print("Pacote válido")
                     return True
                 else:
                     print("Erro: Pacote inválido - pacote de handshake com ID do destinatário incorreto")
                     return False
             elif package.head.h0 == "02":
-                if package.head.h3 == "CC":
+                if package.head.h2 == "CC":
                     print("Pacote válido")
                     return True
                 else:

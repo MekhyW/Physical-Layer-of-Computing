@@ -36,7 +36,6 @@ def checkHandshake():
     rxBuffer, nRx = com1.getData(rxLen)
     packageString = rxBuffer.decode()
     packageDatagram = neoStringToDatagram(packageString)
-    print(packageString)
     if packageString.startswith('01CC55') and packageString.endswith('AABBCCDD'):
         if validatePackage(packageDatagram, restartPackage = restartPackage, lastValidatedPackage = lastValidatedPackage):
             print('Handshake recebido do client')
@@ -115,6 +114,7 @@ def receivePackage():
         packageString = rxBuffer.decode()
         packageDatagram = neoStringToDatagram(packageString)
         packageValidity = validatePackage(packageDatagram, restartPackage = restartPackage, lastValidatedPackage = lastValidatedPackage)
+        print(packageDatagram.head.fullHead)
         com1.rx.clearBuffer()
     analisaPacote(packageDatagram, packageString)
 
