@@ -13,6 +13,7 @@ serialName = "COM8"
 com1 = enlace(serialName)
 ocioso = True
 cont = 0
+log = open("serverlog.txt", "w")
 
 payload = ''
 fileId = ''
@@ -31,13 +32,13 @@ def receiveSacrificeBytes():
     time.sleep(.1)
 
 def checkHandshake():
-    global ocioso, totalPackages, fileId
+    global ocioso, totalPackages, fileId, log
     rxLen = com1.rx.getBufferLen()
     rxBuffer, nRx = com1.getData(rxLen)
     packageString = rxBuffer.decode()
     packageDatagram = neoStringToDatagram(packageString)
     if packageString.startswith('01CC55') and packageString.endswith('AABBCCDD'):
-        if validatePackage(packageDatagram, restartPackage = restartPackage, lastValidatedPackage = lastValidatedPackage):
+        if validatePackage(log, packageDatagram, restartPackage = restartPackage, lastValidatedPackage = lastValidatedPackage):
             print('Handshake recebido do client')
             fileId = packageDatagram.head.h5
             print('Id do arquivo: {}'.format(fileId))
@@ -88,7 +89,7 @@ def analisaPacote(datagram : Datagram, decoded : str):
     cont += 1
 
 def receivePackage():
-    global payload, ocioso, totalPackages, restartPackage, lastValidatedPackage
+    global payload, ocioso, totalPackages, restartPackage, lastValidatedPackage, log
     timer1 = time.time()
     timer2 = time.time()
     rxLen = com1.rx.getBufferLen()
@@ -113,7 +114,7 @@ def receivePackage():
         rxBuffer, nRx = com1.getData(rxLen)
         packageString = rxBuffer.decode()
         packageDatagram = neoStringToDatagram(packageString)
-        packageValidity = validatePackage(packageDatagram, restartPackage = restartPackage, lastValidatedPackage = lastValidatedPackage)
+        packageValidity = validatePackage(log, packageDatagram, restartPackage = restartPackage, lastValidatedPackage = lastValidatedPackage)
         print(packageDatagram.head.fullHead)
         com1.rx.clearBuffer()
     analisaPacote(packageDatagram, packageString)
@@ -128,6 +129,7 @@ def encerrar():
     print("Comunicação encerrada")
     print("-------------------------")
     com1.disable()
+    log.close()
     quit()
 
 if __name__ == "__main__":

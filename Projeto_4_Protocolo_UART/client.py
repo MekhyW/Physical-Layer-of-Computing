@@ -12,6 +12,7 @@ arquivo = None
 payload_size_limit = 99
 cont = 0
 fileId = ''
+log = open("clientlog.txt", "w")
 
 totalPackages = 0
 restartPackage = 1
@@ -73,7 +74,7 @@ def buildPackages():
         
 
 def transferPackage(package):
-    global cont, totalPayloads, restartPackage, lastValidatedPackage
+    global cont, totalPayloads, restartPackage, lastValidatedPackage, log
     com1.sendData(package)
     timer1 = time.time()
     timer2 = time.time()
@@ -96,7 +97,7 @@ def transferPackage(package):
                 rxBuffer, nRx = com1.getData(rxLen)
                 packageString = rxBuffer.decode()
                 packageDatagram = neoStringToDatagram(packageString)
-                packageValidity = validatePackage(packageDatagram, restartPackage = restartPackage, lastValidatedPackage = lastValidatedPackage)
+                packageValidity = validatePackage(log, packageDatagram, restartPackage = restartPackage, lastValidatedPackage = lastValidatedPackage)
                 if packageString.startswith('06'):
                     cont -= 1
     com1.rx.clearBuffer()
@@ -106,6 +107,7 @@ def encerrar():
     print("Comunicação encerrada")
     print("-------------------------")
     com1.disable()
+    log.close()
     quit()
 
 if __name__ == "__main__":
