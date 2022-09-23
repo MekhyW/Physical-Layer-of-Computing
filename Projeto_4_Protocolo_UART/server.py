@@ -4,6 +4,8 @@ from neoDatagram import *
 from neoStringToDatagram import *
 import os
 
+from validatePackage import validatePackage
+
 if os.path.exists("recebido.txt"):
     os.remove("recebido.txt")
     
@@ -11,10 +13,14 @@ serialName = "COM7"
 com1 = enlace(serialName)
 ocioso = True
 cont = 0
-numPck = 0
+
 payload = ''
 previousPackageIndex = -1
 fileId = ''
+
+totalPackages = 0
+restartPackage = 1
+lastValidatedPackage = 0
 
 def receiveSacrificeBytes():
     print('Esperando 1 byte de sacrifício')
@@ -23,33 +29,37 @@ def receiveSacrificeBytes():
     time.sleep(.1)
 
 def checkHandshake():
-    global ocioso, numPck, fileId
+    global ocioso, totalPackages, fileId
     rxLen = com1.rx.getBufferLen()
     rxBuffer, nRx = com1.getData(rxLen)
-    t1 = rxBuffer.decode()
-    if t1.startswith('01CC55') and t1.endswith('AABBCCDD'):
-        print('Handshake recebido do client')
-        fileId = t1[10:12]
-        print('Id do arquivo: {}'.format(fileId))
-        numPck = int(t1[7:9], 16)
-        print('Número de pacotes a serem recebidos: {}'.format(numPck))
-        ocioso = False
+    packageString = rxBuffer.decode()
+    packageDatagram = neoStringToDatagram(packageString)
+    if validatePackage(packageDatagram, restartPackage = restartPackage, lastValidatedPackage = lastValidatedPackage): 
+        if packageString.startswith('01CC55') and packageString.endswith('AABBCCDD'):
+            print('Handshake recebido do client')
+            fileId = packageDatagram.head.h5
+            print('Id do arquivo: {}'.format(fileId))
+            totalPackages = int(packageDatagram.head.h3, 16)
+            print('Número de pacotes a serem recebidos: {}'.format(totalPackages))
+            ocioso = False
+        else:
+            print('Mensagem não é handshake, ignorada')
+            ocioso = True
     else:
-        print('Mensagem não é handshake, ignorada')
+        print('Pacote inválido, ignorado')
         ocioso = True
     com1.rx.clearBuffer()
     
 def handshake():
-    global cont, fileId
-    handshakeHead = Head('02', '55', 'CC', '00', '00', '00', '00', '00', fileId=fileId)
+    global cont, fileId, totalPackages, restartPackage, lastValidatedPackage
+    handshakeHead = Head('02', '55', 'CC', str(totalPackages).zfill(2), '00', '00', str(restartPackage).zfill(2), str(lastValidatedPackage).zfill(2), fileId=fileId)
     handshake = Datagram(handshakeHead, '')
     com1.sendData(bytes(handshake.fullPackage, "utf-8"))
     print('Confirmação de handshake enviada')
     cont = 1
 
 def analisaPacote(datagram : Datagram, decoded : str):
-    global payload, previousPackageIndex
-    global cont
+    global payload, previousPackageIndex, cont
     if not decoded.startswith('03'):
         print("Tipo do pacote errado, pedindo reenvio")
         t6Head = Head('06', '55', 'CC', '00', '00', '00', '00', '00')
@@ -76,8 +86,7 @@ def analisaPacote(datagram : Datagram, decoded : str):
     cont += 1
 
 def receivePackage():
-    global payload, previousPackageIndex
-    global ocioso
+    global payload, previousPackageIndex, ocioso, totalPackages, restartPackage, lastValidatedPackage
     timer1 = time.time()
     timer2 = time.time()
     rxLen = com1.rx.getBufferLen()
@@ -87,21 +96,21 @@ def receivePackage():
         time.sleep(1)
         if tempoatual - timer2 > 20:
             ocioso = True
-            t5Head = Head('05', '55', 'CC', '00', '00', '00', '00', '00')
+            t5Head = Head('05', '55', 'CC', str(totalPackages).zfill(2), '00', '00', str(restartPackage).zfill(2), str(lastValidatedPackage).zfill(2))
             t5 = Datagram(t5Head, '')
             com1.sendData(bytes(t5.fullPackage, "utf-8"))
             print("Timeout :-(")
             encerrar()
         elif tempoatual - timer1 > 2:
-            t4Head = Head('04', '55', 'CC', '00', '00', '00', '00', previousPackageIndex)
+            t4Head = Head('04', '55', 'CC', str(totalPackages).zfill(2), '00', '00', str(restartPackage).zfill(2), str(lastValidatedPackage).zfill(2))
             t4 = Datagram(t4Head, '')
             com1.sendData(bytes(t4.fullPackage, "utf-8"))
             timer1 = tempoatual
     rxBuffer, nRx = com1.getData(rxLen)
-    decoded = rxBuffer.decode()
-    datagram = neoStringToDatagram(decoded)
+    packageString = rxBuffer.decode()
+    packageDatagram = neoStringToDatagram(packageString)
     com1.rx.clearBuffer()
-    analisaPacote(datagram, decoded)
+    analisaPacote(packageDatagram, packageString)
 
 def salvarArquivo():
     print("Salvando arquivo")
@@ -120,9 +129,9 @@ if __name__ == "__main__":
         checkHandshake()
         time.sleep(1)
     handshake()
-    while cont <= numPck:
+    while cont <= totalPackages:
         receivePackage()
-        print("Pacote: {} / {}".format(cont, numPck))
+        print("Pacote: {} / {}".format(cont, totalPackages))
     salvarArquivo()
     print("SUCESSO!")
     encerrar()
