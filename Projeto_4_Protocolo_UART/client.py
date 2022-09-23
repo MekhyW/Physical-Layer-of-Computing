@@ -66,7 +66,7 @@ def buildPackages():
                 payload += str(arquivo[i*payload_size_limit+j])
             except IndexError:
                 break
-        head = Head('03', 'CC', '55', str(totalPayloads), str(i).zfill(2), str(len(payload)), str(restartPackage).zfill(2), str(lastValidatedPackage).zfill(2))
+        head = Head('03', 'CC', '55', str(totalPayloads), str(i+1).zfill(2), str(len(payload)), str(restartPackage).zfill(2), str(lastValidatedPackage).zfill(2))
         datagram = Datagram(head, payload)
         packages.append(bytes(datagram.fullPackage, "utf-8"))
     return packages
