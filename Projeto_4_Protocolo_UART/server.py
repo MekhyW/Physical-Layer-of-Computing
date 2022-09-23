@@ -33,8 +33,8 @@ def checkHandshake():
     rxBuffer, nRx = com1.getData(rxLen)
     packageString = rxBuffer.decode()
     packageDatagram = neoStringToDatagram(packageString)
-    if validatePackage(packageDatagram, restartPackage = restartPackage, lastValidatedPackage = lastValidatedPackage): 
-        if packageString.startswith('01CC55') and packageString.endswith('AABBCCDD'):
+    if packageString.startswith('01CC55') and packageString.endswith('AABBCCDD'):
+        if validatePackage(packageDatagram, restartPackage = restartPackage, lastValidatedPackage = lastValidatedPackage):
             print('Handshake recebido do client')
             fileId = packageDatagram.head.h5
             print('Id do arquivo: {}'.format(fileId))
@@ -42,10 +42,10 @@ def checkHandshake():
             print('Número de pacotes a serem recebidos: {}'.format(totalPackages))
             ocioso = False
         else:
-            print('Mensagem não é handshake, ignorada')
+            print('Pacote inválido')
             ocioso = True
     else:
-        print('Pacote inválido, ignorado')
+        print('Mensagem não é handshake, ignorada')
         ocioso = True
     com1.rx.clearBuffer()
     
@@ -127,6 +127,7 @@ def encerrar():
     quit()
 
 if __name__ == "__main__":
+    receiveSacrificeBytes()
     while ocioso:
         checkHandshake()
         time.sleep(1)
