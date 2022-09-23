@@ -2,6 +2,7 @@ from neoDatagram import Datagram
 
 def validatePackage(package : Datagram, restartPackage = 1, lastValidatedPackage = 0):
     print("Validando pacote...")
+    print(package.head.fullHead)
     if package.head.h3 == "00" or package.head.h6 == "00":
         print("Erro: Pacote inválido - faltando dados cruciais")	
         return False
