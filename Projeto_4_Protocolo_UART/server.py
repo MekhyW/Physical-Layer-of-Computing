@@ -27,7 +27,6 @@ def receiveSacrificeBytes():
     com1.enable()
     time.sleep(.2)
     rxBuffer, nRx = com1.getData(1)
-    print(rxBuffer)
     com1.rx.clearBuffer()
     time.sleep(.1)
 
@@ -69,7 +68,7 @@ def analisaPacote(datagram : Datagram, decoded : str):
         t6 = Datagram(t6Head, '')
         com1.sendData(bytes(t6.fullPackage, "utf-8"))
         return
-    if not decoded.endswith('FEEDBACC'):
+    if not decoded.endswith('AABBCCDD'):
         print("EoP no local errado, pedindo reenvio do pacote")
         t6Head = Head('06', '55', 'CC', str(totalPackages).zfill(2), '00', '00', str(restartPackage).zfill(2), str(lastValidatedPackage).zfill(2))
         t6 = Datagram(t6Head, '')

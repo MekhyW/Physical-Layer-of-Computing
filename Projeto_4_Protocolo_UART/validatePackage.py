@@ -6,7 +6,6 @@ def printAndLog(log, string):
 
 def validatePackage(log, package : Datagram, restartPackage = 1, lastValidatedPackage = 0):
     printAndLog(log, "Validando pacote...")
-    print(package.head.fullHead)
     if package.head.h3 == "00" or package.head.h6 == "00":
         printAndLog(log, "Erro: Pacote inválido - faltando dados cruciais")	
         return False
@@ -61,4 +60,6 @@ def validatePackage(log, package : Datagram, restartPackage = 1, lastValidatedPa
                 return False
         else:
             printAndLog(log, "Erro: Pacote inválido - tamanho do payload incorreto")
+            print("Tamanho do payload esperado: {0}".format(len(package.head.h5)))
+            print("Tamanho do payload recebido: {0}".format(len(package.payload)))
             return False
