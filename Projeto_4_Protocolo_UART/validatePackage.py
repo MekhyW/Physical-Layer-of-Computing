@@ -40,12 +40,8 @@ def validatePackage(package : Datagram, restartPackage = 1, lastValidatedPackage
                     print("Erro: Pacote inválido - pacote de handshake com ID do destinatário incorreto")
                     return False
             elif package.head.h0 == "04":
-                if lastValidatedPackage != 0:
-                    print("Pacote válido")
-                    return True
-                else:
-                    print("Erro: Pacote inválido - índice do último pacote verificado inválido")
-                    return False
+                print("Pacote válido")
+                return True
             elif package.head.h0 == "05":
                 print("Pacote válido")
                 return True
