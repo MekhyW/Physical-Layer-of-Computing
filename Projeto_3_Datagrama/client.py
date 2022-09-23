@@ -4,7 +4,7 @@ import time
 import math
 import numpy as np
 
-serialName = "COM11"
+serialName = "COM12"
 com1 = enlace(serialName)
 arquivo = None
 payload_size_limit = 99
