@@ -12,7 +12,7 @@ arquivo = None
 payload_size_limit = 99
 cont = 0
 fileId = ''
-log = open("clientlog.txt", "w")
+log = open("clientlog.txt", "w", encoding="utf-8")
 
 totalPackages = 0
 restartPackage = 1
