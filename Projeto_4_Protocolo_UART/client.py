@@ -97,7 +97,7 @@ def transferPackage(package):
                 rxBuffer, nRx = com1.getData(rxLen)
                 packageString = rxBuffer.decode()
                 packageDatagram = neoStringToDatagram(packageString)
-                packageValidity = validatePackage(log, packageDatagram, restartPackage = restartPackage, lastValidatedPackage = lastValidatedPackage)
+                packageValidity = validatePackage(log, packageDatagram, restartPackage, lastValidatedPackage)
                 if packageValidity and packageString.startswith('04'):
                     lastValidatedPackage += 1
                     restartPackage += 1
