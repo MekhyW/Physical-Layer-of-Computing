@@ -58,6 +58,8 @@ def handshake():
 
 def buildPackages():
     global totalPayloads, restartPackage, lastValidatedPackage
+    restartPackagelocal = restartPackage
+    lastValidatedPackagelocal = lastValidatedPackage
     packages = []
     totalPayloads = math.ceil(len(arquivo)/payload_size_limit)
     for i in range(totalPayloads):
@@ -67,9 +69,11 @@ def buildPackages():
                 payload += str(arquivo[i*payload_size_limit+j])
             except IndexError:
                 break
-        head = Head('03', 'CC', '55', str(totalPayloads).zfill(2), str(i+1).zfill(2), str(len(payload)).zfill(2), str(restartPackage).zfill(2), str(lastValidatedPackage).zfill(2))
+        head = Head('03', 'CC', '55', str(totalPayloads).zfill(2), str(i+1).zfill(2), str(len(payload)).zfill(2), str(restartPackagelocal).zfill(2), str(lastValidatedPackagelocal).zfill(2))
         datagram = Datagram(head, payload)
         packages.append(bytes(datagram.fullPackage, "utf-8"))
+        restartPackagelocal += 1
+        lastValidatedPackagelocal += 1
     return packages
         
 
@@ -105,7 +109,7 @@ def transferPackage(package):
                 if packageString.startswith('06'):
                     cont -= 1
         com1.rx.clearBuffer()
-    time.sleep(1)
+    time.sleep(2)
         
 def encerrar():
     print("-------------------------")
