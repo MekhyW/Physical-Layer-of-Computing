@@ -104,7 +104,7 @@ def transferPackage(package):
                     cont += 1
                 if packageString.startswith('06'):
                     cont -= 1
-    com1.rx.clearBuffer()
+        com1.rx.clearBuffer()
         
 def encerrar():
     print("-------------------------")
