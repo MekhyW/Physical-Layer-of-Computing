@@ -83,11 +83,11 @@ def analisaPacote(datagram : Datagram, decoded : str):
     payload += datagram.payload
     lastValidatedPackage += 1
     restartPackage += 1
+    cont += 1
     t4Head = Head('04', '55', 'CC', str(totalPackages).zfill(2), '00', '00', str(restartPackage).zfill(2), str(lastValidatedPackage).zfill(2))
     t4 = Datagram(t4Head, '')
     print("v2:" + t4.fullPackage)
     com1.sendData(bytes(t4.fullPackage, "utf-8"))
-    cont += 1
 
 def receivePackage():
     global payload, ocioso, totalPackages, restartPackage, lastValidatedPackage, log

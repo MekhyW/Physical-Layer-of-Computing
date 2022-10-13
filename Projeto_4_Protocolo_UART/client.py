@@ -125,7 +125,7 @@ if __name__ == "__main__":
             cont = 1
     print("Iniciando transmissão de mensagem")
     while cont <= totalPackages:
-        transferPackage(packages[cont-1])
         print("Pacote: {} / {}".format(cont, totalPackages))
+        transferPackage(packages[cont-1])
     print("SUCESSO!")
     encerrar()
