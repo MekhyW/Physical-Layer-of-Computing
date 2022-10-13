@@ -2,4 +2,4 @@ from datetime import datetime
 
 def printAndLog(log, string):
     print(string)
-    log.write(datetime.now() + string + "\n")
+    log.write(str(datetime.now()) + ' ' + string + "\n")
