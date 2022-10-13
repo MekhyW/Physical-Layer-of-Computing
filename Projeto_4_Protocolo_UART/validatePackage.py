@@ -10,6 +10,7 @@ def validatePackage(log, package : Datagram, restartPackage = 1, lastValidatedPa
         printAndLog(log, "Erro: Pacote inválido - faltando dados cruciais")	
         return False
     elif int(package.head.h6) != restartPackage:
+        print(package.head.h6, type(package.head.h6))
         printAndLog(log, "Erro: Pacote inválido - valor de recomeço inválido")
         return False
     elif int(package.head.h7) != lastValidatedPackage:

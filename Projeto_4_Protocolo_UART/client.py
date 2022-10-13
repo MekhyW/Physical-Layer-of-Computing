@@ -6,7 +6,7 @@ import math
 from neoStringToDatagram import neoStringToDatagram
 from validatePackage import validatePackage
 
-serialName = "COM12"
+serialName = "COM13"
 com1 = enlace(serialName)
 arquivo = None
 payload_size_limit = 99
