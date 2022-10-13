@@ -99,12 +99,13 @@ def transferPackage(package):
                 packageDatagram = neoStringToDatagram(packageString)
                 packageValidity = validatePackage(log, packageDatagram, restartPackage = restartPackage, lastValidatedPackage = lastValidatedPackage)
                 if packageValidity and packageString.startswith('04'):
-                    lastValidatedPackage = int(packageDatagram.head.h7)
-                    restartPackage = int(packageDatagram.head.h6)
+                    lastValidatedPackage += 1
+                    restartPackage += 1
                     cont += 1
                 if packageString.startswith('06'):
                     cont -= 1
         com1.rx.clearBuffer()
+    time.sleep(1)
         
 def encerrar():
     print("-------------------------")

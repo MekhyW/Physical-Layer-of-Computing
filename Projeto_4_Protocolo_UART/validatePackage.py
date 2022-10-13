@@ -4,7 +4,7 @@ def printAndLog(log, string):
     print(string)
     log.write(string + "\n")
 
-def validatePackage(log, package : Datagram, restartPackage = 1, lastValidatedPackage = 0):
+def validatePackage(log, package : Datagram, restartPackage, lastValidatedPackage):
     printAndLog(log, "Validando pacote...")
     print("Pacote recebido: " + package.fullPackage)
     if package.head.h3 == "00" or package.head.h6 == "00":
