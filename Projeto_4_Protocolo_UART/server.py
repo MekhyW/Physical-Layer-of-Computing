@@ -31,7 +31,7 @@ def receiveSacrificeBytes():
     time.sleep(.1)
 
 def checkHandshake():
-    global ocioso, totalPackages, fileId, log
+    global ocioso, totalPackages, fileId, log, restartPackage, lastValidatedPackage
     rxLen = com1.rx.getBufferLen()
     rxBuffer, nRx = com1.getData(rxLen)
     packageString = rxBuffer.decode()
@@ -54,12 +54,11 @@ def checkHandshake():
     com1.rx.clearBuffer()
     
 def handshake():
-    global cont, fileId, totalPackages, restartPackage, lastValidatedPackage
+    global fileId, totalPackages, restartPackage, lastValidatedPackage
     handshakeHead = Head('02', '55', 'CC', str(totalPackages).zfill(2), '00', str(fileId).zfill(2), str(restartPackage).zfill(2), str(lastValidatedPackage).zfill(2))
     handshake = Datagram(handshakeHead, '')
     com1.sendData(bytes(handshake.fullPackage, "utf-8"))
     print('Confirmação de handshake enviada')
-    cont = 1
 
 def analisaPacote(datagram : Datagram, decoded : str):
     global payload, cont, totalPackages, restartPackage, lastValidatedPackage
@@ -86,6 +85,7 @@ def analisaPacote(datagram : Datagram, decoded : str):
     restartPackage = lastValidatedPackage + 1
     t4Head = Head('04', '55', 'CC', str(totalPackages).zfill(2), '00', '00', str(restartPackage).zfill(2), str(lastValidatedPackage).zfill(2))
     t4 = Datagram(t4Head, '')
+    print("v2:" + t4.fullPackage)
     com1.sendData(bytes(t4.fullPackage, "utf-8"))
     cont += 1
 
@@ -110,7 +110,9 @@ def receivePackage():
             elif tempoatual - timer1 > 2:
                 t4Head = Head('04', '55', 'CC', str(totalPackages).zfill(2), '00', '00', str(restartPackage).zfill(2), str(lastValidatedPackage).zfill(2))
                 t4 = Datagram(t4Head, '')
+                print("v1:" + t4.fullPackage)
                 com1.sendData(bytes(t4.fullPackage, "utf-8"))
+                time.sleep(1)
                 timer1 = tempoatual
         rxBuffer, nRx = com1.getData(rxLen)
         packageString = rxBuffer.decode()
@@ -142,6 +144,7 @@ if __name__ == "__main__":
         handshake()
         while cont <= totalPackages:
             receivePackage()
+            time.sleep(1)
             print("Pacote: {} / {}".format(cont, totalPackages))
         salvarArquivo()
         print("SUCESSO!")
