@@ -42,7 +42,7 @@ def loadFile():
 
 def handshake():
     global fileId, totalPackages, restartPackage, lastValidatedPackage
-    handshakeHead = Head('01', 'CC', '55', str(totalPackages).zfill(2), '00', '00', str(restartPackage).zfill(2), str(lastValidatedPackage).zfill(2), fileId=fileId)
+    handshakeHead = Head('01', 'CC', '55', str(totalPackages).zfill(2), '00', str(fileId).zfill(2), str(restartPackage).zfill(2), str(lastValidatedPackage).zfill(2))
     handshake = Datagram(handshakeHead, '')
     com1.sendData(bytes(handshake.fullPackage, "utf-8"))
     print('Handshake enviado, aguardando resposta do servidor...')

@@ -55,7 +55,7 @@ def checkHandshake():
     
 def handshake():
     global cont, fileId, totalPackages, restartPackage, lastValidatedPackage
-    handshakeHead = Head('02', '55', 'CC', str(totalPackages).zfill(2), '00', '00', str(restartPackage).zfill(2), str(lastValidatedPackage).zfill(2), fileId=fileId)
+    handshakeHead = Head('02', '55', 'CC', str(totalPackages).zfill(2), '00', str(fileId).zfill(2), str(restartPackage).zfill(2), str(lastValidatedPackage).zfill(2))
     handshake = Datagram(handshakeHead, '')
     com1.sendData(bytes(handshake.fullPackage, "utf-8"))
     print('Confirmação de handshake enviada')

@@ -11,21 +11,13 @@ class Head:
     h9: str = '00'    # Em branco, será parte do Projeto 5 (CRC)
     fullHead: str
 
-    def __init__(self, messageType, senderId, receiverId, totalPackages, currentPackageIndex, payloadSize, restartPackage, lastVerifiedPackage, fileId='00'):
+    def __init__(self, messageType, senderId, receiverId, totalPackages, currentPackageIndex, payloadSizeOrFileId, restartPackage, lastVerifiedPackage):
         self.h0 = messageType
         self.h1 = senderId
         self.h2 = receiverId
         self.h3 = totalPackages
         self.h4 = currentPackageIndex
-        if self.h0 in ['01', '02']:
-            self.h5 = fileId
-        elif self.h0 == '03':
-            if payloadSize == '00':
-                raise Exception("Error: Message type does not support non-0 payload")
-            else:
-                self.h5 = payloadSize
-        else:
-            self.h5 = '00'
+        self.h5 = payloadSizeOrFileId
         self.h6 = restartPackage
         self.h7 = lastVerifiedPackage
         self.fullHead = self.h0 + self.h1 + self.h2 + self.h3 + self.h4 + self.h5 + self.h6 + self.h7 + self.h8 + self.h9
