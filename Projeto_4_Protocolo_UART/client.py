@@ -80,7 +80,7 @@ def buildPackages():
 def transferPackage(package):
     global cont, totalPayloads, restartPackage, lastValidatedPackage, log
     com1.sendData(package)
-    printAndLog(log, "Pacote enviado: " + package.fullPackage)
+    printAndLog(log, "Pacote enviado: " + str(package))
     timer1 = time.time()
     timer2 = time.time()
     rxLen = 0
@@ -91,13 +91,13 @@ def transferPackage(package):
             tempoatual = time.time()
             if tempoatual - timer1 > 5:
                 com1.sendData(package)
-                printAndLog(log, "Pacote enviado: " + package.fullPackage)
+                printAndLog(log, "Pacote enviado: " + str(package))
                 timer1 = tempoatual
             if tempoatual - timer2 > 20:
                 timeoutHead = Head('05', 'CC', '55', str(totalPackages).zfill(2), '00', '00', str(restartPackage).zfill(2), str(lastValidatedPackage).zfill(2))
                 timeout = Datagram(timeoutHead, '')
                 com1.sendData(bytes(timeout.fullPackage, "utf-8"))
-                printAndLog(log, "Pacote enviado: " + package.fullPackage)
+                printAndLog(log, "Pacote enviado: " + str(package))
                 printAndLog(log, "Timeout :-(")
                 encerrar()
             elif rxLen:
