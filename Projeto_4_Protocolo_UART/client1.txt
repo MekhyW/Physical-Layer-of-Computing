@@ -1,0 +1,31 @@
+2022-10-13 15:36:38.084861 Bytes de sacrifício enviados
+2022-10-13 15:36:41.021582 Handshake enviado, aguardando resposta do servidor...
+2022-10-13 15:36:46.090257 Iniciando transmissão de mensagem
+2022-10-13 15:36:46.105249 Pacote: 1 / 6
+2022-10-13 15:36:46.107258 Pacote enviado: b'03CC5506019901000000SHREK\nOnce upon a time there was a lovely \nprincess. But she had an enchantment \nupon her of a fearAABBCCDD'
+2022-10-13 15:36:48.101692 Validando pacote recebido...
+2022-10-13 15:36:48.132698 Pacote válido
+2022-10-13 15:36:50.183280 Pacote: 2 / 6
+2022-10-13 15:36:50.183280 Pacote enviado: b"03CC5506029902010000ful sort which could \nonly be broken by love's first kiss. \nShe was locked away in a castle guardedAABBCCDD"
+2022-10-13 15:36:50.183280 Validando pacote recebido...
+2022-10-13 15:36:50.184281 Pacote válido
+2022-10-13 15:36:52.236694 Pacote: 3 / 6
+2022-10-13 15:36:52.236694 Pacote enviado: b'03CC5506039903020000 \nby a terrible fire-breathing dragon. \nMany brave knights had attempted to \nfree her from this dreAABBCCDD'
+2022-10-13 15:36:52.408991 Validando pacote recebido...
+2022-10-13 15:36:52.439959 Pacote válido
+2022-10-13 15:36:54.472707 Pacote: 4 / 6
+2022-10-13 15:36:54.473706 Pacote enviado: b"03CC5506049904030000adful prison, \nbut non prevailed. She waited in the \ndragon's keep in the highest room of \nthe tallAABBCCDD"
+2022-10-13 15:36:54.474703 Validando pacote recebido...
+2022-10-13 15:36:54.476705 Pacote válido
+2022-10-13 15:36:56.566859 Pacote: 5 / 6
+2022-10-13 15:36:56.567168 Pacote enviado: b"03CC5506059905040000est tower for her true love \nand true love's first kiss. (laughs) \nLike that's ever gonna happen. WAABBCCDD"
+2022-10-13 15:36:56.726215 Validando pacote recebido...
+2022-10-13 15:36:56.758180 Pacote válido
+2022-10-13 15:36:58.796367 Pacote: 6 / 6
+2022-10-13 15:36:58.796367 Pacote enviado: b'03CC5506063106050000hat \na load of - (toilet flush)AABBCCDD'
+2022-10-13 15:36:58.796367 Validando pacote recebido...
+2022-10-13 15:36:58.797368 Pacote válido
+2022-10-13 15:37:00.837890 SUCESSO!
+2022-10-13 15:37:00.869887 -------------------------
+2022-10-13 15:37:00.885884 Comunicação encerrada
+2022-10-13 15:37:00.901886 -------------------------
