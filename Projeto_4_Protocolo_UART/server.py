@@ -9,7 +9,7 @@ from validatePackage import validatePackage
 if os.path.exists("recebido.txt"):
     os.remove("recebido.txt")
     
-serialName = "COM13"
+serialName = "COM9"
 com1 = enlace(serialName)
 ocioso = True
 cont = 0
@@ -144,9 +144,9 @@ if __name__ == "__main__":
         handshake()
         cont = 1
         while cont <= totalPackages:
+            print("Pacote: {} / {}".format(cont, totalPackages))
             receivePackage()
             time.sleep(1)
-            print("Pacote: {} / {}".format(cont, totalPackages))
         salvarArquivo()
         print("SUCESSO!")
         encerrar()
