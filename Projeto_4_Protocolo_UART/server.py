@@ -82,7 +82,7 @@ def analisaPacote(datagram : Datagram, decoded : str):
         return
     payload += datagram.payload
     lastValidatedPackage += 1
-    restartPackage = lastValidatedPackage + 1
+    restartPackage += 1
     t4Head = Head('04', '55', 'CC', str(totalPackages).zfill(2), '00', '00', str(restartPackage).zfill(2), str(lastValidatedPackage).zfill(2))
     t4 = Datagram(t4Head, '')
     print("v2:" + t4.fullPackage)
