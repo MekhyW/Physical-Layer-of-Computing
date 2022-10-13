@@ -87,7 +87,7 @@ def transferPackage(package):
             if tempoatual - timer1 > 5:
                 com1.sendData(package)
                 timer1 = tempoatual
-            if tempoatual - timer2 > 10:
+            if tempoatual - timer2 > 20:
                 timeoutHead = Head('05', 'CC', '55', str(totalPackages).zfill(2), '00', '00', str(restartPackage).zfill(2), str(lastValidatedPackage).zfill(2))
                 timeout = Datagram(timeoutHead, '')
                 com1.sendData(bytes(timeout.fullPackage, "utf-8"))
@@ -98,6 +98,10 @@ def transferPackage(package):
                 packageString = rxBuffer.decode()
                 packageDatagram = neoStringToDatagram(packageString)
                 packageValidity = validatePackage(log, packageDatagram, restartPackage = restartPackage, lastValidatedPackage = lastValidatedPackage)
+                if packageValidity and packageString.startswith('04'):
+                    lastValidatedPackage = int(packageDatagram.head.h7)
+                    restartPackage = int(packageDatagram.head.h6)
+                    cont += 1
                 if packageString.startswith('06'):
                     cont -= 1
     com1.rx.clearBuffer()
@@ -122,6 +126,5 @@ if __name__ == "__main__":
     while cont <= totalPackages:
         transferPackage(packages[cont-1])
         print("Pacote: {} / {}".format(cont, totalPackages))
-        cont += 1
     print("SUCESSO!")
     encerrar()

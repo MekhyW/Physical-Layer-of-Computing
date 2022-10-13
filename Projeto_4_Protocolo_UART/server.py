@@ -9,7 +9,7 @@ from validatePackage import validatePackage
 if os.path.exists("recebido.txt"):
     os.remove("recebido.txt")
     
-serialName = "COM8"
+serialName = "COM9"
 com1 = enlace(serialName)
 ocioso = True
 cont = 0
@@ -36,6 +36,7 @@ def checkHandshake():
     rxBuffer, nRx = com1.getData(rxLen)
     packageString = rxBuffer.decode()
     packageDatagram = neoStringToDatagram(packageString)
+    print("{0} -> {1}".format(packageString, packageDatagram.head.fullHead))
     if packageString.startswith('01CC55') and packageString.endswith('AABBCCDD'):
         if validatePackage(log, packageDatagram, restartPackage = restartPackage, lastValidatedPackage = lastValidatedPackage):
             print('Handshake recebido do client')
@@ -82,6 +83,7 @@ def analisaPacote(datagram : Datagram, decoded : str):
         return
     payload += datagram.payload
     lastValidatedPackage += 1
+    restartPackage = lastValidatedPackage + 1
     t4Head = Head('04', '55', 'CC', str(totalPackages).zfill(2), '00', '00', str(restartPackage).zfill(2), str(lastValidatedPackage).zfill(2))
     t4 = Datagram(t4Head, '')
     com1.sendData(bytes(t4.fullPackage, "utf-8"))
