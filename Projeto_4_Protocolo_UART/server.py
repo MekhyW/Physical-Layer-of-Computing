@@ -3,7 +3,7 @@ import time
 from neoDatagram import *
 from neoStringToDatagram import *
 import os
-
+from logger import *
 from validatePackage import validatePackage
 
 if os.path.exists("recebido.txt"):
@@ -23,7 +23,7 @@ restartPackage = 1
 lastValidatedPackage = 0
 
 def receiveSacrificeBytes():
-    print('Esperando 1 byte de sacrifício')
+    printAndLog(log, 'Esperando 1 byte de sacrifício')
     com1.enable()
     time.sleep(.2)
     rxBuffer, nRx = com1.getData(1)
@@ -39,7 +39,7 @@ def checkHandshake():
     print("{0} -> {1}".format(packageString, packageDatagram.head.fullHead))
     if packageString.startswith('01CC55') and packageString.endswith('AABBCCDD'):
         if validatePackage(log, packageDatagram,  restartPackage, lastValidatedPackage):
-            print('Handshake recebido do client')
+            printAndLog(log, 'Handshake recebido do client')
             fileId = packageDatagram.head.h5
             print('Id do arquivo: {}'.format(fileId))
             totalPackages = int(packageDatagram.head.h3, 16)
@@ -58,24 +58,24 @@ def handshake():
     handshakeHead = Head('02', '55', 'CC', str(totalPackages).zfill(2), '00', str(fileId).zfill(2), str(restartPackage).zfill(2), str(lastValidatedPackage).zfill(2))
     handshake = Datagram(handshakeHead, '')
     com1.sendData(bytes(handshake.fullPackage, "utf-8"))
-    print('Confirmação de handshake enviada')
+    printAndLog(log, 'Confirmação de handshake enviada')
 
 def analisaPacote(datagram : Datagram, decoded : str):
     global payload, cont, totalPackages, restartPackage, lastValidatedPackage
     if not decoded.startswith('03'):
-        print("Tipo do pacote errado, pedindo reenvio")
+        printAndLog(log, "Tipo do pacote errado, pedindo reenvio " + decoded)
         t6Head = Head('06', '55', 'CC', str(totalPackages).zfill(2), '00', '00', str(restartPackage).zfill(2), str(lastValidatedPackage).zfill(2))
         t6 = Datagram(t6Head, '')
         com1.sendData(bytes(t6.fullPackage, "utf-8"))
         return
     if not decoded.endswith('AABBCCDD'):
-        print("EoP no local errado, pedindo reenvio do pacote")
+        printAndLog(log, "EoP no local errado, pedindo reenvio do pacote " + decoded)
         t6Head = Head('06', '55', 'CC', str(totalPackages).zfill(2), '00', '00', str(restartPackage).zfill(2), str(lastValidatedPackage).zfill(2))
         t6 = Datagram(t6Head, '')
         com1.sendData(bytes(t6.fullPackage, "utf-8"))
         return
     if not int(datagram.head.h5) == len(datagram.payload):
-        print("Index do pacote errado, pedindo reenvio do pacote")
+        printAndLog(log, "Index do pacote errado, pedindo reenvio do pacote " + decoded)
         t6Head = Head('06', '55', 'CC', str(totalPackages).zfill(2), '00', '00', str(restartPackage).zfill(2), str(lastValidatedPackage).zfill(2))
         t6 = Datagram(t6Head, '')
         com1.sendData(bytes(t6.fullPackage, "utf-8"))
@@ -105,7 +105,7 @@ def receivePackage():
                 t5Head = Head('05', '55', 'CC', str(totalPackages).zfill(2), '00', '00', str(restartPackage).zfill(2), str(lastValidatedPackage).zfill(2))
                 t5 = Datagram(t5Head, '')
                 com1.sendData(bytes(t5.fullPackage, "utf-8"))
-                print("Timeout :-(")
+                printAndLog(log, "Timeout :-(")
                 encerrar()
             elif tempoatual - timer1 > 2:
                 t4Head = Head('04', '55', 'CC', str(totalPackages).zfill(2), '00', '00', str(restartPackage).zfill(2), str(lastValidatedPackage).zfill(2))
@@ -128,9 +128,9 @@ def salvarArquivo():
         arquivo.write(payload)
 
 def encerrar():
-    print("-------------------------")
-    print("Comunicação encerrada")
-    print("-------------------------")
+    printAndLog(log, "-------------------------")
+    printAndLog(log, "Comunicação encerrada")
+    printAndLog(log, "-------------------------")
     com1.disable()
     log.close()
     quit()
@@ -148,9 +148,9 @@ if __name__ == "__main__":
             time.sleep(1)
             print("Pacote: {} / {}".format(cont, totalPackages))
         salvarArquivo()
-        print("SUCESSO!")
+        printAndLog(log, "SUCESSO!")
         encerrar()
     except Exception as erro:
         print("ops! :-\\")
-        print(erro)
+        printAndLog(log, erro)
         encerrar()

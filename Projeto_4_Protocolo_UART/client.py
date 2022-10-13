@@ -2,7 +2,7 @@ from neoDatagram import *
 from enlace import *
 import time
 import math
-
+from logger import *
 from neoStringToDatagram import neoStringToDatagram
 from validatePackage import validatePackage
 
@@ -23,7 +23,7 @@ def sacrificeBytes():
     time.sleep(.2)
     com1.sendData(b'00')
     time.sleep(1)
-    print("Bytes de sacrifício enviados")
+    printAndLog(log, "Bytes de sacrifício enviados")
 
 def loadFile():
     global arquivo, fileId
@@ -45,7 +45,7 @@ def handshake():
     handshakeHead = Head('01', 'CC', '55', str(totalPackages).zfill(2), '00', str(fileId).zfill(2), str(restartPackage).zfill(2), str(lastValidatedPackage).zfill(2))
     handshake = Datagram(handshakeHead, '')
     com1.sendData(bytes(handshake.fullPackage, "utf-8"))
-    print('Handshake enviado, aguardando resposta do servidor...')
+    printAndLog(log, 'Handshake enviado, aguardando resposta do servidor...')
     time.sleep(5)
     rxLen = com1.rx.getBufferLen()
     if not rxLen or not com1.getData(rxLen)[0].decode().startswith('02'):
@@ -80,6 +80,7 @@ def buildPackages():
 def transferPackage(package):
     global cont, totalPayloads, restartPackage, lastValidatedPackage, log
     com1.sendData(package)
+    printAndLog(log, "Pacote enviado: " + package.fullPackage)
     timer1 = time.time()
     timer2 = time.time()
     rxLen = 0
@@ -90,12 +91,14 @@ def transferPackage(package):
             tempoatual = time.time()
             if tempoatual - timer1 > 5:
                 com1.sendData(package)
+                printAndLog(log, "Pacote enviado: " + package.fullPackage)
                 timer1 = tempoatual
             if tempoatual - timer2 > 20:
                 timeoutHead = Head('05', 'CC', '55', str(totalPackages).zfill(2), '00', '00', str(restartPackage).zfill(2), str(lastValidatedPackage).zfill(2))
                 timeout = Datagram(timeoutHead, '')
                 com1.sendData(bytes(timeout.fullPackage, "utf-8"))
-                print("Timeout :-(")
+                printAndLog(log, "Pacote enviado: " + package.fullPackage)
+                printAndLog(log, "Timeout :-(")
                 encerrar()
             elif rxLen:
                 rxBuffer, nRx = com1.getData(rxLen)
@@ -112,9 +115,9 @@ def transferPackage(package):
     time.sleep(2)
         
 def encerrar():
-    print("-------------------------")
-    print("Comunicação encerrada")
-    print("-------------------------")
+    printAndLog(log, "-------------------------")
+    printAndLog(log, "Comunicação encerrada")
+    printAndLog(log, "-------------------------")
     com1.disable()
     log.close()
     quit()
@@ -127,9 +130,9 @@ if __name__ == "__main__":
     while not cont:
         if handshake():
             cont = 1
-    print("Iniciando transmissão de mensagem")
+    printAndLog(log, "Iniciando transmissão de mensagem")
     while cont <= totalPackages:
-        print("Pacote: {} / {}".format(cont, totalPackages))
+        printAndLog(log, "Pacote: {} / {}".format(cont, totalPackages))
         transferPackage(packages[cont-1])
-    print("SUCESSO!")
+    printAndLog(log, "SUCESSO!")
     encerrar()
