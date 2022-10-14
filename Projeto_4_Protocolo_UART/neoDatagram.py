@@ -20,7 +20,6 @@ class Head:
         self.h5 = payloadSizeOrFileId
         self.h6 = restartPackage
         self.h7 = lastVerifiedPackage
-        
         self.fullHead = self.h0 + self.h1 + self.h2 + self.h3 + self.h4 + self.h5 + self.h6 + self.h7 + self.h8 + self.h9
 
 class Datagram:
