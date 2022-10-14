@@ -16,7 +16,7 @@ log = open("clientlog.txt", "w", encoding="utf-8")
 
 totalPackages = 0
 restartPackage = 1
-lastValidatedPackage = 1
+lastValidatedPackage = 0
 
 def sacrificeBytes():
     com1.enable()
@@ -46,7 +46,7 @@ def handshake():
     global fileId, totalPackages, restartPackage, lastValidatedPackage
     handshakeHead = Head('01', 'CC', '55', str(totalPackages).zfill(2), '00', str(fileId).zfill(2), str(restartPackage).zfill(2), str(lastValidatedPackage).zfill(2))
     handshake = Datagram(handshakeHead, '')
-    logger(log, 'envio', handshake.head.h0, len(handshake.fullPackage), handshake.head.h4, handshake.head.h3, handshake.head.crc)
+    logger(log, 'envio', handshake.head.h0, len(handshake.fullPackage), handshake.head.h4, handshake.head.h3)
     com1.sendData(bytes(handshake.fullPackage, "utf-8"))
     print('Handshake enviado, aguardando resposta do servidor...')
     time.sleep(5)
@@ -57,7 +57,7 @@ def handshake():
     rxBuffer, nRx = com1.getData(rxLen)
     packageString = rxBuffer.decode()
     packageDatagram = neoStringToDatagram(packageString)
-    logger(log, 'recebimento', packageDatagram.head.h0, len(packageString), packageDatagram.head.h4, packageDatagram.head.h3, packageDatagram.head.crc)
+    logger(log, 'recebimento', packageDatagram.head.h0, len(packageString), packageDatagram.head.h4, packageDatagram.head.h3)
     com1.rx.clearBuffer()
     print('Handshake recebido, servidor ativo')
     return True
@@ -88,7 +88,7 @@ def buildPackages():
 
 def transferPackage(package, datagram: Datagram):
     global cont, totalPayloads, restartPackage, lastValidatedPackage, log
-    logger(log, 'envio', datagram.head.h0, len(datagram.fullPackage), datagram.head.h4, datagram.head.h3, datagram.head.crc)
+    logger(log, 'envio', datagram.head.h0, len(datagram.fullPackage), datagram.head.h4, datagram.head.h3)
     com1.sendData(package)
     print("Pacote enviado: " + str(package))
     timer1 = time.time()
@@ -102,13 +102,13 @@ def transferPackage(package, datagram: Datagram):
             if tempoatual - timer2 > 20:
                 timeoutHead = Head('05', 'CC', '55', str(totalPackages).zfill(2), '00', '00', str(restartPackage).zfill(2), str(lastValidatedPackage).zfill(2))
                 timeout = Datagram(timeoutHead, '')
-                logger(log, 'envio', timeout.head.h0, len(timeout.fullPackage), timeout.head.h4, timeout.head.h3, timeout.head.crc)
+                logger(log, 'envio', timeout.head.h0, len(timeout.fullPackage), timeout.head.h4, timeout.head.h3)
                 com1.sendData(bytes(timeout.fullPackage, "utf-8"))
                 print("Pacote enviado: " + str(package))
                 print("Timeout :-(")
                 encerrar()
             elif tempoatual - timer1 > 5:
-                logger(log, 'envio', datagram.head.h0, len(datagram.fullPackage), datagram.head.h4, datagram.head.h3, datagram.head.crc)
+                logger(log, 'envio', datagram.head.h0, len(datagram.fullPackage), datagram.head.h4, datagram.head.h3)
                 com1.sendData(package)
                 print("Pacote enviado: " + str(package))
                 timer1 = tempoatual
@@ -116,7 +116,7 @@ def transferPackage(package, datagram: Datagram):
                 rxBuffer, nRx = com1.getData(rxLen)
                 packageString = rxBuffer.decode()
                 packageDatagram = neoStringToDatagram(packageString)
-                logger(log, 'recebimento', packageDatagram.head.h0, len(packageString), packageDatagram.head.h4, packageDatagram.head.h3, packageDatagram.head.crc)
+                logger(log, 'recebimento', packageDatagram.head.h0, len(packageString), packageDatagram.head.h4, packageDatagram.head.h3)
                 packageValidity = validatePackage(packageDatagram, restartPackage, lastValidatedPackage)
                 if packageValidity and packageString.startswith('04'):
                     lastValidatedPackage += 1
