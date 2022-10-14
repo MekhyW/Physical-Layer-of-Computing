@@ -4,4 +4,4 @@ def logger(log, sendOrRecieve, messageType, packageSize, packageIndex, totalPack
     if messageType != 3:
         log.write(str(datetime.now()) + " / " + str(sendOrRecieve) + " / " + str(messageType) + " / " + str(packageSize) + "\n")	
     else:
-        log.write(str(datetime.now()) + " / " + str(sendOrRecieve) + " / " + str(messageType) + " / " + str(packageSize) + " / " + str(packageIndex) + " / " + str(totalPackages) + str(crc) + "\n")
+        log.write(str(datetime.now()) + " / " + str(sendOrRecieve) + " / " + str(messageType) + " / " + str(packageSize) + " / " + str(packageIndex) + " / " + str(totalPackages) + " / " + str(crc) + "\n")
