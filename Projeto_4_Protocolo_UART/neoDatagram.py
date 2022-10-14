@@ -25,7 +25,8 @@ class Head:
         self.h6 = restartPackage
         self.h7 = lastVerifiedPackage
         self.semiHead = self.h0 + self.h1 + self.h2 + self.h3 + self.h4 + self.h5 + self.h6 + self.h7
-        self.crc = str(crc16(bytes(self.semiHead, "utf-8")), "utf-8")
+        self.crc = str(crc16(bytes(self.semiHead, "utf-8")))
+        print(self.crc)
         self.h8 = self.crc[0:2]
         self.h9 = self.crc[2:4]
         self.fullHead = self.semiHead + self.crc

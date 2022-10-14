@@ -14,5 +14,4 @@ def crc16(head: bytes):
                 register ^= generator
         register &= 0xFFFF
 
-    print(type(register ^ xor_out))
     return register ^ xor_out
