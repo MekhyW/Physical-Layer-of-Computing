@@ -104,13 +104,7 @@ def receivePackage():
         while not rxLen:
             rxLen = com1.rx.getBufferLen()
             tempoatual = time.time()
-            if tempoatual - timer1 > 2:
-                t4Head = Head('04', '55', 'CC', str(totalPackages).zfill(2), '00', '00', str(restartPackage).zfill(2), str(lastValidatedPackage).zfill(2))
-                t4 = Datagram(t4Head, '')
-                logger(log, 'envio', t4.head.h0, len(t4.fullPackage), t4.head.h4, t4.head.h3)
-                com1.sendData(bytes(t4.fullPackage, "utf-8"))
-                time.sleep(1)
-                timer1 = tempoatual
+            time.sleep(2)
             if tempoatual - timer2 > 20:
                 ocioso = True
                 t5Head = Head('05', '55', 'CC', str(totalPackages).zfill(2), '00', '00', str(restartPackage).zfill(2), str(lastValidatedPackage).zfill(2))
@@ -119,6 +113,13 @@ def receivePackage():
                 logger(log, 'envio', t5.head.h0, len(t5.fullPackage), t5.head.h4, t5.head.h3)
                 print("Timeout :-(")
                 encerrar()
+            elif tempoatual - timer1 > 2:
+                t4Head = Head('04', '55', 'CC', str(totalPackages).zfill(2), '00', '00', str(restartPackage).zfill(2), str(lastValidatedPackage).zfill(2))
+                t4 = Datagram(t4Head, '')
+                logger(log, 'envio', t4.head.h0, len(t4.fullPackage), t4.head.h4, t4.head.h3)
+                com1.sendData(bytes(t4.fullPackage, "utf-8"))
+                time.sleep(1)
+                timer1 = tempoatual
         rxBuffer, nRx = com1.getData(rxLen)
         packageString = rxBuffer.decode()
         packageDatagram = neoStringToDatagram(packageString)
