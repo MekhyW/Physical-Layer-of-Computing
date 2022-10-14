@@ -6,7 +6,7 @@ from logger import *
 from neoStringToDatagram import neoStringToDatagram
 from validatePackage import validatePackage
 
-serialName = "COM13"
+serialName = "COM11"
 com1 = enlace(serialName)
 arquivo = None
 payload_size_limit = 99
@@ -27,7 +27,8 @@ def sacrificeBytes():
 
 def loadFile():
     global arquivo, fileId
-    filename = input("Digite o nome do arquivo a ser enviado: ")
+    #filename = input("Digite o nome do arquivo a ser enviado: ")
+    filename = "jureg.txt"
     while len(fileId) != 2:
         fileId = input("Digite o ID do arquivo (2 dígitos): ")
     try:
@@ -97,11 +98,6 @@ def transferPackage(package, datagram: Datagram):
         while not rxLen:
             rxLen = com1.rx.getBufferLen()
             tempoatual = time.time()
-            if tempoatual - timer1 > 5:
-                logger(log, 'envio', datagram.head.h0, len(datagram.fullPackage), datagram.head.h4, datagram.head.h3)
-                com1.sendData(package)
-                print("Pacote enviado: " + str(package))
-                timer1 = tempoatual
             if tempoatual - timer2 > 20:
                 timeoutHead = Head('05', 'CC', '55', str(totalPackages).zfill(2), '00', '00', str(restartPackage).zfill(2), str(lastValidatedPackage).zfill(2))
                 timeout = Datagram(timeoutHead, '')
@@ -110,6 +106,11 @@ def transferPackage(package, datagram: Datagram):
                 print("Pacote enviado: " + str(package))
                 print("Timeout :-(")
                 encerrar()
+            elif tempoatual - timer1 > 5:
+                logger(log, 'envio', datagram.head.h0, len(datagram.fullPackage), datagram.head.h4, datagram.head.h3)
+                com1.sendData(package)
+                print("Pacote enviado: " + str(package))
+                timer1 = tempoatual
             elif rxLen:
                 rxBuffer, nRx = com1.getData(rxLen)
                 packageString = rxBuffer.decode()
