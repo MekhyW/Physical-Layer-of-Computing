@@ -30,7 +30,8 @@ def loadFile():
     #filename = input("Digite o nome do arquivo a ser enviado: ")
     filename = "jureg.txt"
     while len(fileId) != 2:
-        fileId = input("Digite o ID do arquivo (2 dígitos): ")
+        #fileId = input("Digite o ID do arquivo (2 dígitos): ")
+        fileId = "00"
     try:
         with open(filename, "r") as file:
             arquivo = file.read()
