@@ -9,7 +9,7 @@ from validatePackage import validatePackage
 if os.path.exists("recebido.txt"):
     os.remove("recebido.txt")
     
-serialName = "COM9"
+serialName = "COM7"
 com1 = enlace(serialName)
 ocioso = True
 cont = 0
