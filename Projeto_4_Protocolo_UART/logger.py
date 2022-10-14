@@ -1,5 +1,7 @@
 from datetime import datetime
 
-def printAndLog(log, string):
-    print(string)
-    log.write(str(datetime.now()) + ' ' + string + "\n")
+def logger(log, sendOrRecieve, messageType, packageSize, packageIndex, totalPackages):
+    if messageType != 3:
+        log.write(str(datetime.now()) + " / " + str(sendOrRecieve) + " / " + str(messageType) + " / " + str(packageSize))	
+    else:
+        log.write(str(datetime.now()) + " / " + str(sendOrRecieve) + " / " + str(messageType) + " / " + str(packageSize) + " / " + str(packageIndex) + " / " + str(totalPackages))
