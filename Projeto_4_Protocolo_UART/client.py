@@ -16,7 +16,7 @@ log = open("clientlog.txt", "w", encoding="utf-8")
 
 totalPackages = 0
 restartPackage = 1
-lastValidatedPackage = 0
+lastValidatedPackage = 1
 
 def sacrificeBytes():
     com1.enable()
