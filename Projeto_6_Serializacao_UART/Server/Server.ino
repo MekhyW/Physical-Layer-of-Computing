@@ -1,9 +1,19 @@
-void setup() {
-  // put your setup code here, to run once:
+#define baud 9600
+#define pin 10
 
+bool readPin() {
+  return digitalRead(pin);
+}
+
+void setup() {
+  Serial.begin(baud);
+  pinMode(pin, INPUT);
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-
+  Serial.println(readPin());
+  //Serial.println("Aguardando sinal LOW");
+  //while (readPin()) {
+  //}
+  //Serial.println("Recebendo mensagem");
 }
