@@ -1,3 +1,5 @@
+from crc import *
+
 class Head:
     h0: str = '00'    # Tipo de mensagem : '01' - handhake client, '02' - handshake server, '03' - data, '04' - verification, '05' - timeout, '06' - error
     h1: str = '00'    # Livre, será tilizado como Id do remetente: 'CC' - client, '55' - server
@@ -9,6 +11,8 @@ class Head:
     h7: str = '00'    # Último pacote recebido e verificado com sucesso - começa em 00
     h8: str = '00'    # Em branco, será parte do Projeto 5 (CRC)
     h9: str = '00'    # Em branco, será parte do Projeto 5 (CRC)
+    crc: str
+    semiHead: str
     fullHead: str
 
     def __init__(self, messageType, senderId, receiverId, totalPackages, currentPackageIndex, payloadSizeOrFileId, restartPackage, lastVerifiedPackage):
@@ -20,7 +24,11 @@ class Head:
         self.h5 = payloadSizeOrFileId
         self.h6 = restartPackage
         self.h7 = lastVerifiedPackage
-        self.fullHead = self.h0 + self.h1 + self.h2 + self.h3 + self.h4 + self.h5 + self.h6 + self.h7 + self.h8 + self.h9
+        self.semiHead = self.h0 + self.h1 + self.h2 + self.h3 + self.h4 + self.h5 + self.h6 + self.h7
+        self.crc = str(crc16(bytes(self.semiHead, "utf-8")), "utf-8")
+        self.h8 = self.crc[0:2]
+        self.h9 = self.crc[2:4]
+        self.fullHead = self.semiHead + self.crc
 
 class Datagram:
     head: Head

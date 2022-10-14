@@ -40,7 +40,7 @@ def checkHandshake():
     if packageString.startswith('01CC55') and packageString.endswith('AABBCCDD'):
         if validatePackage(packageDatagram,  restartPackage, lastValidatedPackage):
             print('Handshake recebido do client')
-            logger(log, 'recebimento', packageDatagram.head.h0, len(packageString), packageDatagram.head.h4, packageDatagram.head.h3)
+            logger(log, 'recebimento', packageDatagram.head.h0, len(packageString), packageDatagram.head.h4, packageDatagram.head.h3, packageDatagram.head.crc)
             fileId = packageDatagram.head.h5
             print('Id do arquivo: {}'.format(fileId))
             totalPackages = int(packageDatagram.head.h3, 16)
@@ -58,7 +58,7 @@ def handshake():
     global fileId, totalPackages, restartPackage, lastValidatedPackage
     handshakeHead = Head('02', '55', 'CC', str(totalPackages).zfill(2), '00', str(fileId).zfill(2), str(restartPackage).zfill(2), str(lastValidatedPackage).zfill(2))
     handshake = Datagram(handshakeHead, '')
-    logger(log, 'envio', handshake.head.h0, len(handshake.fullPackage), handshake.head.h4, handshake.head.h3)
+    logger(log, 'envio', handshake.head.h0, len(handshake.fullPackage), handshake.head.h4, handshake.head.h3, handshake.head.crc)
     com1.sendData(bytes(handshake.fullPackage, "utf-8"))
     print('Confirmação de handshake enviada')
 
@@ -68,21 +68,21 @@ def analisaPacote(datagram : Datagram, decoded : str):
         print("Tipo do pacote errado, pedindo reenvio " + decoded)
         t6Head = Head('06', '55', 'CC', str(totalPackages).zfill(2), '00', '00', str(restartPackage).zfill(2), str(lastValidatedPackage).zfill(2))
         t6 = Datagram(t6Head, '')
-        logger(log, 'envio', t6.head.h0, len(t6.fullPackage), t6.head.h4, t6.head.h3)
+        logger(log, 'envio', t6.head.h0, len(t6.fullPackage), t6.head.h4, t6.head.h3, t6.head.crc)
         com1.sendData(bytes(t6.fullPackage, "utf-8"))
         return
     if not decoded.endswith('AABBCCDD'):
         print("EoP no local errado, pedindo reenvio do pacote " + decoded)
         t6Head = Head('06', '55', 'CC', str(totalPackages).zfill(2), '00', '00', str(restartPackage).zfill(2), str(lastValidatedPackage).zfill(2))
         t6 = Datagram(t6Head, '')
-        logger(log, 'envio', t6.head.h0, len(t6.fullPackage), t6.head.h4, t6.head.h3)
+        logger(log, 'envio', t6.head.h0, len(t6.fullPackage), t6.head.h4, t6.head.h3, t6.head.crc)
         com1.sendData(bytes(t6.fullPackage, "utf-8"))
         return
     if not int(datagram.head.h5) == len(datagram.payload):
         print("Index do pacote errado, pedindo reenvio do pacote " + decoded)
         t6Head = Head('06', '55', 'CC', str(totalPackages).zfill(2), '00', '00', str(restartPackage).zfill(2), str(lastValidatedPackage).zfill(2))
         t6 = Datagram(t6Head, '')
-        logger(log, 'envio', t6.head.h0, len(t6.fullPackage), t6.head.h4, t6.head.h3)
+        logger(log, 'envio', t6.head.h0, len(t6.fullPackage), t6.head.h4, t6.head.h3, t6.head.crc)
         com1.sendData(bytes(t6.fullPackage, "utf-8"))
         return
     payload += datagram.payload
@@ -106,13 +106,13 @@ def receivePackage():
                 t5Head = Head('05', '55', 'CC', str(totalPackages).zfill(2), '00', '00', str(restartPackage).zfill(2), str(lastValidatedPackage).zfill(2))
                 t5 = Datagram(t5Head, '')
                 com1.sendData(bytes(t5.fullPackage, "utf-8"))
-                logger(log, 'envio', t5.head.h0, len(t5.fullPackage), t5.head.h4, t5.head.h3)
+                logger(log, 'envio', t5.head.h0, len(t5.fullPackage), t5.head.h4, t5.head.h3, t5.head.crc)
                 print("Timeout :-(")
                 encerrar()
             elif tempoatual - timer1 > 2:
                 t4Head = Head('04', '55', 'CC', str(totalPackages).zfill(2), '00', '00', str(restartPackage).zfill(2), str(lastValidatedPackage).zfill(2))
                 t4 = Datagram(t4Head, '')
-                logger(log, 'envio', t4.head.h0, len(t4.fullPackage), t4.head.h4, t4.head.h3)
+                logger(log, 'envio', t4.head.h0, len(t4.fullPackage), t4.head.h4, t4.head.h3, t4.head.crc)
                 print("v1: " + t4.head.fullHead)
                 com1.sendData(bytes(t4.fullPackage, "utf-8"))
                 time.sleep(1)
@@ -121,7 +121,7 @@ def receivePackage():
         packageString = rxBuffer.decode()
         packageDatagram = neoStringToDatagram(packageString)
         packageValidity = validatePackage(packageDatagram, restartPackage,  lastValidatedPackage)
-        logger(log, 'recebimento', packageDatagram.head.h0, len(packageString), packageDatagram.head.h4, packageDatagram.head.h3)
+        logger(log, 'recebimento', packageDatagram.head.h0, len(packageString), packageDatagram.head.h4, packageDatagram.head.h3, packageDatagram.head.crc)
         print(packageDatagram.head.fullHead)
         com1.rx.clearBuffer()
     analisaPacote(packageDatagram, packageString)
