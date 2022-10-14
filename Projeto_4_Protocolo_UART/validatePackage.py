@@ -5,7 +5,7 @@ def validatePackage(package : Datagram, restartPackage, lastValidatedPackage):
     print("Validando pacote recebido...")
     print("Pacote recebido: " + package.fullPackage)
     if package.head.h3 == "00" or package.head.h6 == "00":
-        print(log, "Erro: Pacote inválido - faltando dados cruciais")	
+        print("Erro: Pacote inválido - faltando dados cruciais")	
         return False
     elif int(package.head.h6) != restartPackage:
         print(package.head.h6, type(package.head.h6))
