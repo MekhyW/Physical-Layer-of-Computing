@@ -20,7 +20,7 @@ fileId = ''
 
 totalPackages = 0
 restartPackage = 1
-lastValidatedPackage = 0
+lastValidatedPackage = 1
 
 def receiveSacrificeBytes():
     print('Esperando 1 byte de sacrifício')
@@ -89,11 +89,6 @@ def analisaPacote(datagram : Datagram, decoded : str):
     lastValidatedPackage += 1
     restartPackage += 1
     cont += 1
-    t4Head = Head('04', '55', 'CC', str(totalPackages).zfill(2), '00', '00', str(restartPackage).zfill(2), str(lastValidatedPackage).zfill(2))
-    t4 = Datagram(t4Head, '')
-    logger(log, 'envio', t4.head.h0, len(t4.fullPackage), t4.head.h4, t4.head.h3)
-    print("v2: " +  t4.head.fullHead)
-    com1.sendData(bytes(t4.fullPackage, "utf-8"))
 
 def receivePackage():
     global payload, ocioso, totalPackages, restartPackage, lastValidatedPackage, log
