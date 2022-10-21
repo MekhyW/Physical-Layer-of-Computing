@@ -3,7 +3,7 @@
 #define character 'B'
 
 bool message[8] = {0, 0, 0, 0, 0, 0, 0, 0}; //01000010
-bool parity = true;
+bool parity = false;
 int timeskip = 1000000/baud;
 
 void sendBit(bool Bit) {

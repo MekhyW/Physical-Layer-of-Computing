@@ -2,7 +2,7 @@
 #define pin 10
 
 int character = 0;
-bool parity = true;
+bool parity = false;
 int timeskip = 1000000/baud;
 
 bool readPin() {
