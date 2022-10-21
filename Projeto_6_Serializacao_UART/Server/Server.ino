@@ -23,7 +23,7 @@ void receiveMessage() {
   if (readPin() != parity) {
     Serial.println("Erro: Paridade incorreta");
   } else {
-    Serial.println(character, HEX);
+    Serial.println(char(character));
   }
 }
 
@@ -33,6 +33,7 @@ void setup() {
   Serial.println("Aguardando sinal LOW");
   while (readPin()) {
   }
+  delayMicroseconds(timeskip/2);
   receiveMessage();
 }
 

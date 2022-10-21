@@ -1,4 +1,4 @@
-#define baud 9600
+#define baud 9660
 #define pin 10
 #define character 'B'
 
@@ -13,7 +13,7 @@ void sendBit(bool Bit) {
 
 void assembleMessage() {
   int characterInt = int(character);
-  for (int i=7; i>=0; i--) {
+  for (int i=0; i<=7; i++) {
     message[i] = bitRead(characterInt, i);
     if (message[i]) {
       parity = !parity;
