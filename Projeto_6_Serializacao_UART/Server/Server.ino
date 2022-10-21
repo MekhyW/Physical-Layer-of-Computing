@@ -8,9 +8,10 @@ bool readPin() {
 void receiveMessage() {
   byte character = 0;
   bool receivedBit;
-  bool parity = true;
+  bool parity = false;
   for (int i=0; i<=7; i++) {
     receivedBit = digitalRead(pin);
+    Serial.println(receivedBit);
     character = character + (receivedBit << i);
     if (receivedBit == HIGH) {
       parity = !parity;
@@ -19,7 +20,7 @@ void receiveMessage() {
   if (digitalRead(pin) != parity) {
     Serial.println("Erro: Paridade incorreta");
   } else {
-    Serial.println(character, HEX);
+    Serial.println(receivedBit);
   }
 }
 
