@@ -1,26 +1,28 @@
 #define baud 9600
 #define pin 10
 
+int character = 0;
+bool parity = true;
+
 bool readPin() {
-  return digitalRead(pin);
+  bool reading = digitalRead(pin);
+  delayMicroseconds(1000000/baud);
+  return reading;
 }
 
 void receiveMessage() {
-  byte character = 0;
   bool receivedBit;
-  bool parity = false;
   for (int i=0; i<=7; i++) {
-    receivedBit = digitalRead(pin);
-    Serial.println(receivedBit);
-    character = character + (receivedBit << i);
-    if (receivedBit == HIGH) {
+    receivedBit = readPin();
+    character |= (receivedBit << i);
+    if (receivedBit) {
       parity = !parity;
     }
   }
-  if (digitalRead(pin) != parity) {
+  if (readPin() != parity) {
     Serial.println("Erro: Paridade incorreta");
   } else {
-    Serial.println(receivedBit);
+    Serial.println(character, HEX);
   }
 }
 

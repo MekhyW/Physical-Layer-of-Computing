@@ -1,13 +1,12 @@
 #define baud 9600
 #define pin 10
-#define character 'B' //01000010
+#define character 'B'
 
-bool message[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+bool message[8] = {0, 0, 0, 0, 0, 0, 0, 0}; //01000010
 bool parity = true;
 
 void sendBit(bool Bit) {
   digitalWrite(pin, Bit);
-  Serial.print(Bit);
   delayMicroseconds(1000000/baud);
 }
 
@@ -15,7 +14,7 @@ void assembleMessage() {
   int characterInt = int(character);
   for (int i=7; i>=0; i--) {
     message[i] = bitRead(characterInt, i);
-    if (bitRead(characterInt, i) == HIGH) {
+    if (message[i]) {
       parity = !parity;
     }
   }
@@ -23,7 +22,7 @@ void assembleMessage() {
 
 void sendMessage() {
   sendBit(LOW); //start bit
-  for (int i=7; i>=0; i--) {
+  for (int i=0; i<=7; i++) {
     sendBit(message[i]);
   }
   sendBit(parity);
