@@ -4,10 +4,11 @@
 
 bool message[8] = {0, 0, 0, 0, 0, 0, 0, 0}; //01000010
 bool parity = true;
+int timeskip = 1000000/baud;
 
 void sendBit(bool Bit) {
   digitalWrite(pin, Bit);
-  delayMicroseconds(1000000/baud);
+  delayMicroseconds(timeskip);
 }
 
 void assembleMessage() {

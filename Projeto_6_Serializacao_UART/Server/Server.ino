@@ -3,10 +3,11 @@
 
 int character = 0;
 bool parity = true;
+int timeskip = 1000000/baud;
 
 bool readPin() {
   bool reading = digitalRead(pin);
-  delayMicroseconds(1000000/baud);
+  delayMicroseconds(timeskip);
   return reading;
 }
 
