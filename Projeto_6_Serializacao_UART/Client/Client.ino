@@ -1,4 +1,4 @@
-#define baud 9660
+#define baud 9600
 #define pin 10
 #define character 'B'
 
