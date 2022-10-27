@@ -5,8 +5,6 @@ import matplotlib.pyplot as plt
 from scipy.fftpack import fft
 from scipy import signal as window
 
-
-
 class signalMeu:
     def __init__(self):
         self.init = 0
@@ -24,8 +22,14 @@ class signalMeu:
         yf = fft(signal*W)
         return(xf, np.abs(yf[0:N//2]))
 
+    def plotOriginal(self, signal):
+        plt.plot(range(500), signal[0:500])
+        plt.show()
+
     def plotFFT(self, signal, fs):
         x,y = self.calcFFT(signal, fs)
         plt.figure()
         plt.plot(x, np.abs(y))
         plt.title('Fourier')
+        plt.xlim([600, 1700])
+        plt.show()
