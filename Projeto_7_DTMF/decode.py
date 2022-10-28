@@ -24,16 +24,22 @@ def main():
        
     #voce importou a bilioteca sounddevice como, por exemplo, sd. entao
     # os seguintes parametros devem ser setados:
-    sd.default.samplerate = #taxa de amostragem
-    sd.default.channels = #numCanais # o numero de canais, tipicamente são 2. Placas com dois canais. Se ocorrer problemas pode tentar com 1. No caso de 2 canais, ao gravar um audio, terá duas listas
-    duration =  tempo # #tempo em segundos que ira aquisitar o sinal acustico captado pelo mic
+    sd.default.samplerate = 44100 #taxa de amostragem
+    sd.default.channels = 2 #numCanais # o numero de canais, tipicamente são 2. Placas com dois canais. Se ocorrer problemas pode tentar com 1. No caso de 2 canais, ao gravar um audio, terá duas listas
+    duration =  5 # #tempo em segundos que ira aquisitar o sinal acustico captado pelo mic
     
-    #calcule o numero de amostras "numAmostras" que serao feitas (numero de aquisicoes) durante a gracação. Para esse cálculo você deverá utilizar a taxa de amostragem e o tempo de gravação
+    #calcule o numero de amostras "numAmostras" que serao feitas (numero de aquisicoes) durante a gravação. Para esse cálculo você deverá utilizar a taxa de amostragem e o tempo de gravação
+    
+    numAmostras = sd.default.samplerate * duration
+    freqDeAmostragem = sd.default.samplerate
 
     #faca um print na tela dizendo que a captacao comecará em n segundos. e entao 
     #use um time.sleep para a espera
+    print("A captura começará em 3 segundos")
+    time.sleep(3)
    
     #Ao seguir, faca um print informando que a gravacao foi inicializada
+    print("A gravação foi inicializada")
 
     #para gravar, utilize
     audio = sd.rec(int(numAmostras), freqDeAmostragem, channels=1)
@@ -44,9 +50,16 @@ def main():
     #analise sua variavel "audio". pode ser um vetor com 1 ou 2 colunas, lista, isso dependerá so seu sistema, drivers etc...
     #extraia a parte que interessa da gravação (as amostras) gravando em uma variável "dados". Isso porque a variável audio pode conter dois canais e outas informações). 
     
+    #dados = audio[:,0] #se tiver 2 canais
+    dados = audio #se tiver 1 canal
+    
     # use a funcao linspace e crie o vetor tempo. Um instante correspondente a cada amostra!
+
+    tempo = np.linspace(0, duration, numAmostras)
   
-    # plot do áudio gravado (dados) vs tempo! Não plote todos os pontos, pois verá apenas uma mancha (freq altas) . 
+    # plot do áudio gravado (dados) vs tempo! Não plote todos os pontos, pois verá apenas uma mancha (freq altas).
+
+    plt.plot(tempo, dados) 
        
     ## Calcule e plote o Fourier do sinal audio. como saida tem-se a amplitude e as frequencias
     xf, yf = signal.calcFFT(y, fs)
