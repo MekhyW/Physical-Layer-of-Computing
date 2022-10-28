@@ -33,3 +33,4 @@ class signalMeu:
         plt.title('Fourier')
         plt.xlim([600, 1700])
         plt.show()
+        return x,y

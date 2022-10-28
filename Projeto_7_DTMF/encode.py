@@ -2,12 +2,16 @@ from suaBibSignal import *
 import numpy as np
 import sounddevice as sd
 import matplotlib.pyplot as plt
+sd.default.samplerate = 44100
+sd.default.channels = 2
 
 def todB(s):
     sdB = 10*np.log10(s)
     return(sdB)
 
 def main():
+    signalmeu = signalMeu()
+    duration =  3
     print("Inicializando encoder")
     print("Aguardando usuário")
     keys = ['1','2','3','A','4','5','6','B','7','8','9','C','*','0','#','D']
@@ -19,17 +23,16 @@ def main():
         return
     print("Gerando Tons base")
     tone = []
-    for t in range(3 * 44100):
-        senA = np.sin(2 * np.pi * first_freq[keys.index(NUM)] * t / 44100)
-        senB = np.sin(2 * np.pi * second_freq[keys.index(NUM)] * t / 44100)
+    for t in range(duration * sd.default.samplerate):
+        senA = np.sin(2 * np.pi * first_freq[keys.index(NUM)] * t / sd.default.samplerate)
+        senB = np.sin(2 * np.pi * second_freq[keys.index(NUM)] * t / sd.default.samplerate)
         tone.append(senA + senB)
     print("Executando as senoides (emitindo o som)")
     print("Gerando Tom referente ao símbolo : {}".format(NUM))
-    sd.play(tone, 44100)
+    sd.play(tone, sd.default.samplerate)
     sd.wait()
-    signalmeu = signalMeu()
     signalmeu.plotOriginal(tone)
-    signalmeu.plotFFT(tone, 44100)
+    signalmeu.plotFFT(tone, sd.default.samplerate)
 
 if __name__ == "__main__":
     main()
