@@ -23,7 +23,7 @@ class signalMeu:
         return(xf, np.abs(yf[0:N//2]))
 
     def plotOriginal(self, signal):
-        plt.plot(range(500), signal[0:500])
+        plt.plot(range(len(signal)), signal)
         plt.show()
 
     def plotFFT(self, signal, fs):
@@ -31,6 +31,6 @@ class signalMeu:
         plt.figure()
         plt.plot(x, np.abs(y))
         plt.title('Fourier')
-        plt.xlim([600, 1700])
+        #plt.xlim([11800, 16200])
         plt.show()
         return x,y

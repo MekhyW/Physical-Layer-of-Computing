@@ -14,24 +14,37 @@ def butter_lowpass_filter(data, cutoff, fs, order):
     return filtered
 
 def main():
+    signalmeu = signalMeu()
     samplerate, data = wavfile.read(soundfile)
+    data = data.sum(axis=1) / 2
     print("Tocando som original")
     sd.play(data, samplerate)
     sd.wait()
+    signalmeu.plotOriginal(data)
+    signalmeu.plotFFT(data, samplerate)
+    ########################################################################
     filtered = butter_lowpass_filter(data, 2200, samplerate, 2)
     print("Com filtro passa baixa")
     sd.play(filtered, samplerate)
     sd.wait()
+    signalmeu.plotOriginal(filtered)
+    signalmeu.plotFFT(filtered, samplerate)
+    ########################################################################
     carrier_tone = []
     for t in range(len(filtered)):
-        carrier_tone.append(np.sin(2 * np.pi * carrier_rate * t/samplerate))
+        carrier_tone.append(np.sin(2 * np.pi * carrier_rate * t / samplerate))
     modulated = []
     for t in range(len(filtered)):
         modulated.append(filtered[t] * carrier_tone[t])
+    modulated = np.array(modulated)
+    maxamp = np.max(np.abs(modulated))
+    modulated = modulated / maxamp
     print("Modulado")
     sd.play(modulated, samplerate)
     sd.wait()
     sf.write('audio_modulated.wav', modulated, samplerate)
+    signalmeu.plotOriginal(modulated)
+    signalmeu.plotFFT(modulated, samplerate)
 
 if __name__ == "__main__":
     main()
