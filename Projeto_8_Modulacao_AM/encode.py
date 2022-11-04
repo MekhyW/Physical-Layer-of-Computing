@@ -2,6 +2,7 @@ from suaBibSignal import *
 from scipy.signal import butter,sosfilt
 from scipy.io import wavfile
 import sounddevice as sd
+import soundfile as sf
 soundfile = 'audio.wav'
 carrier_rate = 14000
 
@@ -30,6 +31,7 @@ def main():
     print("Modulado")
     sd.play(modulated, samplerate)
     sd.wait()
+    sf.write('audio_modulated.wav', modulated, samplerate)
 
 if __name__ == "__main__":
     main()
