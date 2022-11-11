@@ -24,6 +24,7 @@ class signalMeu:
 
     def plotOriginal(self, signal):
         plt.plot(range(len(signal)), signal)
+        plt.title('Imported signal')
         plt.show()
 
     def plotFFT(self, signal, fs):

@@ -16,10 +16,10 @@ def butter_lowpass_filter(data, cutoff, fs, order):
 def main():
     signalmeu = signalMeu()
     samplerate, data = wavfile.read(soundfile)
-    data = data.sum(axis=1) / 2
     print("Tocando som original")
     sd.play(data, samplerate)
     sd.wait()
+    data = data.sum(axis=1) / 2
     signalmeu.plotOriginal(data)
     signalmeu.plotFFT(data, samplerate)
     ########################################################################
