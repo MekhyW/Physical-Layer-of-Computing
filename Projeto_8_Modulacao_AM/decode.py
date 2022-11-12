@@ -12,7 +12,8 @@ def butter_lowpass_filter(data, cutoff, fs, order):
     normal_cutoff = cutoff / nyq
     sos = butter(order, normal_cutoff, 'lowpass', output='sos')
     filtered = sosfilt(sos, data)
-    return filtered
+    normalized = filtered/np.max(filtered)
+    return normalized
 
 def main():
     signalmeu = signalMeu()
